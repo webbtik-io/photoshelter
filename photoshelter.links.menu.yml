@@ -1,0 +1,6 @@
+photoshelter.admin:
+  title: 'PhotoShelter API Settings'
+  description: 'Edit settings to integrate the API.'
+  parent: system.admin_config_development
+  route_name: photoshelter.content
+  weight: 100

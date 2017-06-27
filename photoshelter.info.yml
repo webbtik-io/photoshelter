@@ -1,4 +1,8 @@
-name: Module name
+name: PhotoShelter API
+description: 'Consumes the PhotoShelter API'
+package: Custom
+
 type: module
-description: 'A description of what your module does.'
 core: 8.x
+
+php: 7.1

@@ -1,0 +1,7 @@
+photoshelter.content:
+  path: '/photoshelter'
+  defaults:
+    _controller: 'Drupal\photoshelter\Controller\PhotoController::content'
+    _title: 'PhotoShelter API'
+  requirements:
+    _permission: 'access content'
