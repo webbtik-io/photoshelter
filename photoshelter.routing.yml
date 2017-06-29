@@ -5,3 +5,11 @@ photoshelter.content:
     _title: 'PhotoShelter API'
   requirements:
     _permission: 'access content'
+
+photoshelter.form:
+  path: '/photoshelter/form'
+  defaults:
+    _form: 'Drupal\photoshelter\Form\PhotoshelterForm'
+    _title: 'Demo Form'
+  requirements:
+    _permission: 'access simple page'
