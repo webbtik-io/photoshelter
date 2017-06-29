@@ -1,0 +1,55 @@
+uuid: 7ee7c9a4-095f-423e-b93e-59d732ec2fe9
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.ps_collection.field_cas_required
+    - field.field.node.ps_collection.field_collection_id
+    - field.field.node.ps_collection.field_description
+    - field.field.node.ps_collection.field_name
+    - node.type.ps_collection
+  module:
+    - user
+id: node.ps_collection.default
+targetEntityType: node
+bundle: ps_collection
+mode: default
+content:
+  field_cas_required:
+    weight: 104
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_collection_id:
+    weight: 101
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_description:
+    weight: 103
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_name:
+    weight: 102
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  links:
+    weight: 100
+    region: content
+hidden: {  }
