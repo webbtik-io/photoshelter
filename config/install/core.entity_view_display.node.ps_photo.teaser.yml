@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - node.type.ps_photo
+  module:
+    - user
+id: node.ps_photo.teaser
+targetEntityType: node
+bundle: ps_photo
+mode: teaser
+content:
+  links:
+    weight: 100
+    region: content
+hidden: {  }
