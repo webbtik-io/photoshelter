@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.ps_photo.field_file_name
     - field.field.node.ps_photo.field_height
     - field.field.node.ps_photo.field_image_id
+    - field.field.node.ps_photo.field_parent_id
     - field.field.node.ps_photo.field_screen_height
     - field.field.node.ps_photo.field_screen_height_max
     - field.field.node.ps_photo.field_screen_width
@@ -18,6 +19,8 @@ dependencies:
   module:
     - link
     - user
+_core:
+  default_config_hash: fuSn5-FaqR3FOT7jb9o5ZdNQX1an3hbobs3MaXQQuyY
 id: node.ps_photo.default
 targetEntityType: node
 bundle: ps_photo
@@ -64,6 +67,14 @@ content:
     region: content
   field_image_id:
     weight: 101
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_parent_id:
+    weight: 113
     label: above
     settings:
       link_to_entity: false

@@ -3,9 +3,15 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.ps_gallery.field_gallery_description
+    - field.field.node.ps_gallery.field_gallery_id
+    - field.field.node.ps_gallery.field_gallery_name
+    - field.field.node.ps_gallery.field_key_image_id
     - node.type.ps_gallery
   module:
     - user
+_core:
+  default_config_hash: KbR9KlEl-_VrGRPBAJfnYm41c_qahRNFeU-jubGvA_4
 id: node.ps_gallery.teaser
 targetEntityType: node
 bundle: ps_gallery
@@ -14,4 +20,8 @@ content:
   links:
     weight: 100
     region: content
-hidden: {  }
+hidden:
+  field_gallery_description: true
+  field_gallery_id: true
+  field_gallery_name: true
+  field_key_image_id: true

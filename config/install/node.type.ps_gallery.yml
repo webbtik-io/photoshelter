@@ -8,6 +8,8 @@ third_party_settings:
     available_menus:
       - main
     parent: 'main:'
+_core:
+  default_config_hash: BeFH5Ftqeb-Qa_u4rOxW4Jt5C_2igqOCXtE0VW8fKck
 name: 'PS Gallery'
 type: ps_gallery
 description: 'Gallery from your PhotoShelter.'
