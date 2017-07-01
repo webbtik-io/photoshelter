@@ -6,6 +6,7 @@ dependencies:
     - field.field.node.ps_photo.field_cas_required
     - field.field.node.ps_photo.field_file_name
     - field.field.node.ps_photo.field_image_id
+    - field.field.node.ps_photo.field_link
     - field.field.node.ps_photo.field_parent_id
     - node.type.ps_photo
   module:
@@ -49,6 +50,14 @@ content:
     region: content
   field_image_id:
     weight: 31
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_link:
+    weight: 43
     settings:
       size: 60
       placeholder: ''

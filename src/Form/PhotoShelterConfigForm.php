@@ -215,8 +215,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
   }
 
-  // TODO: Set CAS according to PS permission
-
   /**
    * @param string $api_key
    * @param \DateTime $time
@@ -279,6 +277,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $this->checkForDuplicates('collection', $collection['collection_id']);
       $keyImageId = $this->getKeyImageId('collection', $collection['collection_id'], $api_key, $options);
       $link = $this->getMediaLink('collection', $collection['collection_id'], $api_key, $options);
+      $cas_required = $this->getPermission('gallery', $gallery['gallery_id'], $api_key, $options);
 
       // Create node from $collection and $keyImageId
       $node = Node::create([
@@ -291,7 +290,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'promote' => 0,
         'comment' => 0,
         'created' => \Drupal::time()->getRequestTime(),
-        'field_cas_required' => TRUE,
+        'field_cas_required' => $cas_required,
         'field_collection_id' => $collection['collection_id'],
         'field_description' => $collection['description'],
         'field_key_image_id' => $keyImageId,
@@ -357,7 +356,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       // Get the gallery key image and parent id
       $keyImageId = $this->getKeyImageId('gallery', $gallery['gallery_id'], $api_key, $options);
       $parentId = $this->getParentId('gallery', $gallery['gallery_id'], $api_key, $options);
-      $link = $this->getMediaLink('collection', $gallery['collection_id'], $api_key, $options);
+      $link = $this->getMediaLink('gallery', $gallery['gallery_id'], $api_key, $options);
+      $cas_required = $this->getPermission('gallery', $gallery['gallery_id'], $api_key, $options);
 
       // Create node from $gallery and $keyImageId
       $node = Node::create([
@@ -370,7 +370,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'promote' => 0,
         'comment' => 0,
         'created' => \Drupal::time()->getRequestTime(),
-        'field_cas_required' => TRUE,
+        'field_cas_required' => $cas_required,
         'field_gallery_id' => $gallery['gallery_id'],
         'field_gallery_description' => $gallery['description'],
         'field_key_image_id' => $keyImageId,
@@ -453,6 +453,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       // Get image parent id
       $parentId = $this->getParentId('image', $image['image_id'], $api_key, $options);
 
+      // Get image permission
+      $cas_required = $this->getImagePermission($image['image_id'], $parentId, $api_key, $options);
+
       // Get auth_link
       $url = 'https://www.photoshelter.com/psapi/v3/mem/$mage/'
              . $image['image_id'] . '/link?api_key=' . $api_key;
@@ -465,7 +468,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       }
       curl_close($ch);
       $link_response = json_decode($link_response, TRUE);
-      $auth_link = $link_response['data']['Parents']['auth_link'];
+      $auth_link = $link_response['data']['ImageLink']['auth_link'];
+      $link = $link_response['data']['ImageLink']['link'];
 
       // Create node from $image and $keyImageId
       $node = Node::create([
@@ -478,11 +482,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'promote' => 0,
         'comment' => 0,
         'created' => \Drupal::time()->getRequestTime(),
-        'field_cas_required' => TRUE,
+        'field_cas_required' => $cas_required,
         'field_image_id' => $image['image_id'],
         'field_file_name'=> $image['file_name'],
         'field_parent_id' => $parentId,
         'field_auth_link' => $auth_link,
+        'field_link' => $link,
       ]);
       try {
         $node->save();
@@ -545,6 +550,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     return $parentId;
   }
 
+  /**
+   * @param string $media
+   * @param string $id
+   * @param string $api_key
+   * @param array $options
+   *
+   * @return bool
+   */
   private function getMediaLink(string $media, string $id, string $api_key, array &$options) {
     // Get the link
     $url = 'https://www.photoshelter.com/psapi/v3/mem/' . $media . '/'
@@ -560,6 +573,72 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $link = json_decode($link, TRUE);
     $linkUrl = $link['data']['CollectionLink']['url'];
     return $linkUrl;
+  }
+
+  /**
+   * @param string $media
+   * @param string $id
+   * @param string $api_key
+   * @param array $options
+   *
+   * @return bool
+   */
+  private function getPermission(string $media, string $id, string $api_key, array &$options) {
+    $url = 'https://www.photoshelter.com/psapi/v3/mem/' . $media . '/'
+           . $id . '/permission?api_key=' . $api_key;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, $options);
+    $permission = curl_exec($ch);
+    if ($permission === FALSE) {
+      curl_close($ch);
+      echo "Error getting $media permission: " . curl_error($ch);
+      exit(1);
+    }
+    curl_close($ch);
+    $permission = json_decode($permission, TRUE);
+    $permissionStatus = $permission['data']['Permission']['mode'];
+    switch ($permissionStatus) {
+      case 'private':
+        return TRUE;
+      case 'permission':
+        return TRUE;
+      case 'public':
+        return FALSE;
+      default:
+        return TRUE;
+    }
+  }
+
+  /**
+   * @param string $imageId
+   * @param string $galleryId
+   * @param string $api_key
+   * @param array $options
+   *
+   * @return bool
+   */
+  private function getImagePermission(string $imageId, string $galleryId, string $api_key, array &$options) {
+    $galleryPermission = $this->getPermission('gallery', $galleryId, $api_key, $options);
+
+    $url = 'https://www.photoshelter.com/psapi/v3/mem/image/'
+           . $imageId . '/public?api_key=' . $api_key;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, $options);
+    $permission = curl_exec($ch);
+    if ($permission === FALSE) {
+      curl_close($ch);
+      echo "Error getting image permission: " . curl_error($ch);
+      exit(1);
+    }
+    curl_close($ch);
+    $permission = json_decode($permission, TRUE);
+    $permissionStatus = $permission['data']['Image']['is_public'];
+    if ($galleryPermission && $permissionStatus == 't') {
+      return FALSE;
+    }
+    else {
+      return TRUE;
+    }
   }
 
   /**
