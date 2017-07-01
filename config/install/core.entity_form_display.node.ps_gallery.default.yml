@@ -1,15 +1,19 @@
-uuid: a8455867-4088-4fa8-8874-d57eeebaa9ad
 langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.ps_gallery.field_cas_required
     - field.field.node.ps_gallery.field_gallery_description
     - field.field.node.ps_gallery.field_gallery_id
     - field.field.node.ps_gallery.field_gallery_name
     - field.field.node.ps_gallery.field_key_image_id
+    - field.field.node.ps_gallery.field_link
+    - field.field.node.ps_gallery.field_parent_id
     - node.type.ps_gallery
   module:
     - path
+_core:
+  default_config_hash: 0N9BcTfOsuhDKnPrbHVfDCt8skZNnOJtt2eGLxYeyGA
 id: node.ps_gallery.default
 targetEntityType: node
 bundle: ps_gallery
@@ -53,6 +57,14 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
+  field_link:
+    weight: 35
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
   path:
     type: path
     weight: 30
@@ -90,4 +102,6 @@ content:
       placeholder: ''
     region: content
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  field_cas_required: true
+  field_parent_id: true

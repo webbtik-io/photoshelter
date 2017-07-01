@@ -7,12 +7,13 @@ dependencies:
     - field.field.node.ps_gallery.field_gallery_id
     - field.field.node.ps_gallery.field_gallery_name
     - field.field.node.ps_gallery.field_key_image_id
+    - field.field.node.ps_gallery.field_link
     - field.field.node.ps_gallery.field_parent_id
     - node.type.ps_gallery
   module:
     - user
 _core:
-  default_config_hash: N5FMPPa9ifumVo-OJzqiK4I3U47WyrlOr19pZTKX4zs
+  default_config_hash: P64QlpUooN5zgsUJpK-cd9iVB3IaeUn1r-XSG61Ga5Q
 id: node.ps_gallery.default
 targetEntityType: node
 bundle: ps_gallery
@@ -53,6 +54,14 @@ content:
     region: content
   field_key_image_id:
     weight: 104
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_link:
+    weight: 107
     label: above
     settings:
       link_to_entity: false

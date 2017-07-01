@@ -215,7 +215,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
   }
 
-  // TODO: Add links to collections and galleries. Set CAS according to PS permission
+  // TODO: Set CAS according to PS permission
 
   /**
    * @param string $api_key
@@ -278,6 +278,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
       $this->checkForDuplicates('collection', $collection['collection_id']);
       $keyImageId = $this->getKeyImageId('collection', $collection['collection_id'], $api_key, $options);
+      $link = $this->getMediaLink('collection', $collection['collection_id'], $api_key, $options);
 
       // Create node from $collection and $keyImageId
       $node = Node::create([
@@ -295,6 +296,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'field_description' => $collection['description'],
         'field_key_image_id' => $keyImageId,
         'field_name'=> $collection['name'],
+        'field_link' => $link,
       ]);
       try {
         $node->save();
@@ -355,6 +357,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       // Get the gallery key image and parent id
       $keyImageId = $this->getKeyImageId('gallery', $gallery['gallery_id'], $api_key, $options);
       $parentId = $this->getParentId('gallery', $gallery['gallery_id'], $api_key, $options);
+      $link = $this->getMediaLink('collection', $gallery['collection_id'], $api_key, $options);
 
       // Create node from $gallery and $keyImageId
       $node = Node::create([
@@ -373,6 +376,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'field_key_image_id' => $keyImageId,
         'field_gallery_name'=> $gallery['name'],
         'field_parent_id' => $parentId,
+        'field_link' => $link,
       ]);
       try {
         $node->save();
@@ -525,7 +529,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @return bool
    */
   private function getParentId(string $media, string $id, string $api_key, array &$options) {
-    // Get the gallery parent
+    // Get the parent
     $url = 'https://www.photoshelter.com/psapi/v3/mem/' . $media . '/'
            . $id . '/parents?api_key=' . $api_key;
     $ch = curl_init($url);
@@ -539,6 +543,23 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $parent = json_decode($keyImage, TRUE);
     $parentId = $parent['data']['Parents']['collection_id'];
     return $parentId;
+  }
+
+  private function getMediaLink(string $media, string $id, string $api_key, array &$options) {
+    // Get the link
+    $url = 'https://www.photoshelter.com/psapi/v3/mem/' . $media . '/'
+           . $id . '/link?api_key=' . $api_key;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, $options);
+    $link = curl_exec($ch);
+    if ($link === FALSE) {
+      curl_close($ch);
+      return FALSE;
+    }
+    curl_close($ch);
+    $link = json_decode($link, TRUE);
+    $linkUrl = $link['data']['CollectionLink']['url'];
+    return $linkUrl;
   }
 
   /**
@@ -588,6 +609,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     if (!$this->getPhotos($api_key, $time)) {
       return FALSE;
     }
+    return TRUE;
   }
 
   /**

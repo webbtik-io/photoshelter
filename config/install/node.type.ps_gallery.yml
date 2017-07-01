@@ -9,7 +9,7 @@ third_party_settings:
       - main
     parent: 'main:'
 _core:
-  default_config_hash: BeFH5Ftqeb-Qa_u4rOxW4Jt5C_2igqOCXtE0VW8fKck
+  default_config_hash: CHYhU_MHjxIMtcXEQafofDH-z0tDsSjCBe2AimUBYYA
 name: 'PS Gallery'
 type: ps_gallery
 description: 'Gallery from your PhotoShelter.'
