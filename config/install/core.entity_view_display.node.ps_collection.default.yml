@@ -11,8 +11,6 @@ dependencies:
     - node.type.ps_collection
   module:
     - user
-_core:
-  default_config_hash: MlkFLjKupqfT1yJZ-kS-qvge0GeaEiQNhUAjE1LcWVE
 id: node.ps_collection.default
 targetEntityType: node
 bundle: ps_collection

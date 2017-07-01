@@ -11,8 +11,6 @@ dependencies:
     - node.type.ps_collection
   module:
     - path
-_core:
-  default_config_hash: PpPYg6OaPcoA4BNUrUKloGtSd_4MJvH7ltG-kTs79YM
 id: node.ps_collection.default
 targetEntityType: node
 bundle: ps_collection

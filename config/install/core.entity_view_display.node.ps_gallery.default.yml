@@ -12,8 +12,6 @@ dependencies:
     - node.type.ps_gallery
   module:
     - user
-_core:
-  default_config_hash: P64QlpUooN5zgsUJpK-cd9iVB3IaeUn1r-XSG61Ga5Q
 id: node.ps_gallery.default
 targetEntityType: node
 bundle: ps_gallery

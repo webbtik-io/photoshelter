@@ -88,7 +88,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#title' => $this->t('Your PhotoShelter API key'),
       '#default_value' => $config->get('api_key')
     ];
-    // TODO: Add information about what each button does
     $form['sync_new'] = [
       '#type' => 'submit',
       '#value' => t('Sync New Additions'),
@@ -277,7 +276,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $this->checkForDuplicates('collection', $collection['collection_id']);
       $keyImageId = $this->getKeyImageId('collection', $collection['collection_id'], $api_key, $options);
       $link = $this->getMediaLink('collection', $collection['collection_id'], $api_key, $options);
-      $cas_required = $this->getPermission('gallery', $gallery['gallery_id'], $api_key, $options);
+      $cas_required = $this->getPermission('gallery', $collection['gallery_id'], $api_key, $options);
 
       // Create node from $collection and $keyImageId
       $node = Node::create([

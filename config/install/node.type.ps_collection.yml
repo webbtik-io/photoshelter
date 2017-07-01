@@ -8,8 +8,6 @@ third_party_settings:
     available_menus:
       - main
     parent: 'main:'
-_core:
-  default_config_hash: aQey-urAs-D6N8uXUsQFqjvt1sUH7KhX32CIqrfyZYs
 name: 'PS Collection'
 type: ps_collection
 description: 'Collections from your PhotoShelter.'

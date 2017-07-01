@@ -11,8 +11,6 @@ dependencies:
     - node.type.ps_photo
   module:
     - user
-_core:
-  default_config_hash: EYwiS0Sm3RoB2oSYK9V5gq2KHtv9rIwnAlseMIUAejw
 id: node.ps_photo.teaser
 targetEntityType: node
 bundle: ps_photo

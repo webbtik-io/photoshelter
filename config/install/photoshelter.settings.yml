@@ -3,5 +3,3 @@ password: 12345abcde
 api_key: 0a1b2c3d4e5f
 last_full_sync: Never
 last_sync: Never
-
-# TODO: Remove the _core: and default_config_hash lines from all the content types
