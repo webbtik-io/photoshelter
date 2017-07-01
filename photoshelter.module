@@ -4,4 +4,47 @@
 * A description of what your module does.
 */
 
-//TODO: Implement hook_help()
+namespace Drupal\photoshelter;
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * @param $route_name
+ * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+ *
+ * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+ */
+function photoshelter_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.photoshelter':
+      /** @noinspection HtmlUnknownTarget */
+      return t('
+        <h2>PhotoShelter API Integration</h2>
+        <h3>Your First Sync</h3>
+          <p>Everything you need to do with this module can be found under <em>
+          <a href="../admin/config/development/photoshelter/form">
+          Development -> Configuration -> PhotoShelter</a></em>. Once there:</p>
+          <ol>
+            <li>Enter your PhotoShelter login credentials and click <em>Save
+            configuration</em>.</li>
+            <li>Click <em>Sync all data</em>. It may take several minutes.</li>
+          </ol>
+          <p>All your PhotoShelter data has been saved as either a PS Collection, 
+           PS Gallery, or PS Image. You can then display them use link any other
+            content type.</p>
+        <h3>Things to Know</h3>
+          <ul>
+            <li>Any change you make to the content in Drupal will not transfer
+             back to PhotoShelter</li>
+            <li>If you add new pictures or modify exisitng pictures, you only 
+            need to click <em>Sync new additions</em>. If you delete images, you
+             will need to sync all data.</li>
+            <li>Any images that need authentication to login will require CAS on
+             this site. Users will be able to down load then picture with no
+             watermark.</li>
+            <li>The images are not stored on this site, only their links are. 
+            When displaying images, you\'ll need to wrap the link in an image tag.</li>
+          </ul>
+      ');
+  }
+}
