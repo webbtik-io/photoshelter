@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\photoshelter\Form;
+use Drupal\Core\Config\Config;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Database\Connection;
@@ -129,6 +130,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $api_key = $config->get('api_key');
     $time = $config->get('last_sync');
 
+    // Get the date
     if ($time == 'Never') {
       try {
         $time = new DateTime(NULL, new DateTimeZone('GMT'));
@@ -142,21 +144,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         new DateTimeZone('GMT'));
     }
 
-    // TODO: Error message if return is false
-    $this->authenticate($form_state);
-    $this->getCollections($api_key, $time);
-    $this->getGalleries($api_key, $time);
-    $this->getPhotos($api_key, $time);
+    //Get the data
+    if(!$this->getData($form_state, $time, $api_key)) {
+      $form_state->setError($form,
+        'There was a problem fetching your PhotoShelter data.');
+    }
 
     // Update time saved in config
-    try {
-      $currentTime = new DateTime(NULL, new DateTimeZone('GMT'));
-    } catch (Exception $e) {
-      echo $e->getMessage();
-      exit(1);
-    }
-    $config->set('last_sync', $currentTime->format(DateTime::RFC850));
-    $config->save();
+    $this->updateConfigPostSync($config);
     parent::submitForm($form, $form_state);
   }
 
@@ -169,29 +164,21 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $config = $this->config('photoshelter.settings');
     $api_key = $config->get('api_key');
 
-    $this->authenticate($form_state);
-    // TODO: Error message if return is false;
-    $this->getCollections($api_key, $time);
-    $this->getGalleries($api_key, $time);
-    $this->getPhotos($api_key, $time);
+    //Get the data
+    if(!$this->getData($form_state, $time, $api_key)) {
+      $form_state->setError($form,
+        'There was a problem fetching your PhotoShelter data.');
+    }
 
     // Update time saved in config
-    try {
-      $currentTime = new DateTime(NULL, new DateTimeZone('GMT'));
-    } catch (Exception $e) {
-      echo $e->getMessage();
-      exit(1);
-    }
-    $config->set('last_full_sync', $currentTime->format(DateTime::RFC850));
-    $config->set('last_sync', $currentTime->format(DateTime::RFC850));
-    $config->save();
+    $this->updateConfigPostSync(TRUE, $config);
     parent::submitForm($form, $form_state);
   }
 
   /**
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  private function authenticate(FormStateInterface $form_state) {
+  private function authenticate(FormStateInterface &$form_state) {
     $email = $form_state->getValue('email');
     $password = $form_state->getValue('password');
     $api_key = $form_state->getValue('api_key');
@@ -512,7 +499,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    *
    * @return bool
    */
-  private function getKeyImageId(string $media, string $id, string $api_key, array $options) {
+  private function getKeyImageId(string $media, string $id, string $api_key, array &$options) {
     // Get the image key image
     $url = 'https://www.photoshelter.com/psapi/v3/mem/' . $media . '/'
            . $id . '/key_image?api_key=' . $api_key;
@@ -537,7 +524,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    *
    * @return bool
    */
-  private function getParentId(string $media, string $id, string $api_key, array $options) {
+  private function getParentId(string $media, string $id, string $api_key, array &$options) {
     // Get the gallery parent
     $url = 'https://www.photoshelter.com/psapi/v3/mem/' . $media . '/'
            . $id . '/parents?api_key=' . $api_key;
@@ -581,5 +568,43 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         exit(1);
       }
     }
+  }
+
+  /**
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * @param \DateTime $time
+   * @param string $api_key
+   *
+   * @return bool
+   */
+  private function getData(FormStateInterface &$form_state, DateTime $time, string $api_key) {
+    $this->authenticate($form_state);
+    if (!$this->getCollections($api_key, $time)) {
+      return FALSE;
+    }
+    if (!$this->getGalleries($api_key, $time)) {
+      return FALSE;
+    }
+    if (!$this->getPhotos($api_key, $time)) {
+      return FALSE;
+    }
+  }
+
+  /**
+   * @param bool $isFullSync
+   * @param \Drupal\Core\Config\Config $config
+   */
+  private function updateConfigPostSync(bool $isFullSync = FALSE, Config &$config) {
+    try {
+      $currentTime = new DateTime(NULL, new DateTimeZone('GMT'));
+    } catch (Exception $e) {
+      echo $e->getMessage();
+      exit(1);
+    }
+    if ($isFullSync) {
+      $config->set('last_full_sync', $currentTime->format(DateTime::RFC850));
+    }
+    $config->set('last_sync', $currentTime->format(DateTime::RFC850));
+    $config->save();
   }
 }
