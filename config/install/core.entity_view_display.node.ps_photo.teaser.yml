@@ -6,20 +6,13 @@ dependencies:
     - field.field.node.ps_photo.field_auth_link
     - field.field.node.ps_photo.field_cas_required
     - field.field.node.ps_photo.field_file_name
-    - field.field.node.ps_photo.field_height
     - field.field.node.ps_photo.field_image_id
-    - field.field.node.ps_photo.field_screen_height
-    - field.field.node.ps_photo.field_screen_height_max
-    - field.field.node.ps_photo.field_screen_width
-    - field.field.node.ps_photo.field_screen_width_max
-    - field.field.node.ps_photo.field_thumb_height
-    - field.field.node.ps_photo.field_thumb_width
-    - field.field.node.ps_photo.field_width
+    - field.field.node.ps_photo.field_parent_id
     - node.type.ps_photo
   module:
     - user
 _core:
-  default_config_hash: s52mU0Xsho0niu-bRerUBLt9pOGZtrMq_NpSShS87x0
+  default_config_hash: EYwiS0Sm3RoB2oSYK9V5gq2KHtv9rIwnAlseMIUAejw
 id: node.ps_photo.teaser
 targetEntityType: node
 bundle: ps_photo
@@ -32,12 +25,5 @@ hidden:
   field_auth_link: true
   field_cas_required: true
   field_file_name: true
-  field_height: true
   field_image_id: true
-  field_screen_height: true
-  field_screen_height_max: true
-  field_screen_width: true
-  field_screen_width_max: true
-  field_thumb_height: true
-  field_thumb_width: true
-  field_width: true
+  field_parent_id: true

@@ -1,3 +1,7 @@
-api_key: 12345abcde
-username: username@example.com
-password: password
+email: photoshelter@example.com
+password: 12345abcde
+api_key: 0a1b2c3d4e5f
+last_full_sync: Never
+last_sync: Never
+
+# TODO: Remove the _core: and default_config_hash lines from all the content types

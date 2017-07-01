@@ -1,15 +1,9 @@
-photoshelter.content:
-  path: '/photoshelter'
+photoshelter_config_form:
+  path: 'admin/config/development/photoshelter/form'
   defaults:
-    _controller: 'Drupal\photoshelter\Controller\PhotoController::content'
-    _title: 'PhotoShelter API'
+    _form: '\Drupal\photoshelter\Form\PhotoShelterConfigForm'
+    _title: 'PhotoShelter API Config Form'
   requirements:
-    _permission: 'access content'
-
-photoshelter.form:
-  path: '/photoshelter/form'
-  defaults:
-    _form: 'Drupal\photoshelter\Form\PhotoshelterForm'
-    _title: 'Demo Form'
-  requirements:
-    _permission: 'access simple page'
+    _role: 'administrator'
+  options:
+    _admin_route: true

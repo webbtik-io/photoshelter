@@ -5,19 +5,14 @@ dependencies:
     - field.field.node.ps_photo.field_auth_link
     - field.field.node.ps_photo.field_cas_required
     - field.field.node.ps_photo.field_file_name
-    - field.field.node.ps_photo.field_height
     - field.field.node.ps_photo.field_image_id
-    - field.field.node.ps_photo.field_screen_height
-    - field.field.node.ps_photo.field_screen_height_max
-    - field.field.node.ps_photo.field_screen_width
-    - field.field.node.ps_photo.field_screen_width_max
-    - field.field.node.ps_photo.field_thumb_height
-    - field.field.node.ps_photo.field_thumb_width
-    - field.field.node.ps_photo.field_width
+    - field.field.node.ps_photo.field_parent_id
     - node.type.ps_photo
   module:
     - link
     - path
+_core:
+  default_config_hash: FmCwGHVBIzqEX16CdPCrUUtOx29qfg57F8UR4zCqbAs
 id: node.ps_photo.default
 targetEntityType: node
 bundle: ps_photo
@@ -52,13 +47,6 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_height:
-    weight: 33
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
   field_image_id:
     weight: 31
     settings:
@@ -66,55 +54,6 @@ content:
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
-    region: content
-  field_screen_height:
-    weight: 35
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
-  field_screen_height_max:
-    weight: 37
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
-  field_screen_width:
-    weight: 36
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
-  field_screen_width_max:
-    weight: 38
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
-  field_thumb_height:
-    weight: 39
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
-  field_thumb_width:
-    weight: 40
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
-  field_width:
-    weight: 34
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
     region: content
   path:
     type: path
@@ -153,4 +92,5 @@ content:
       placeholder: ''
     region: content
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  field_parent_id: true

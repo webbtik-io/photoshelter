@@ -3,9 +3,15 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.ps_collection.field_cas_required
+    - field.field.node.ps_collection.field_collection_id
+    - field.field.node.ps_collection.field_description
+    - field.field.node.ps_collection.field_name
     - node.type.ps_collection
   module:
     - user
+_core:
+  default_config_hash: xqWc4OSS_LhTwQ3tvEJfZWQKXZD46pD4raGLXRwUqhk
 id: node.ps_collection.teaser
 targetEntityType: node
 bundle: ps_collection
@@ -14,4 +20,8 @@ content:
   links:
     weight: 100
     region: content
-hidden: {  }
+hidden:
+  field_cas_required: true
+  field_collection_id: true
+  field_description: true
+  field_name: true

@@ -9,7 +9,7 @@ third_party_settings:
       - main
     parent: 'main:'
 _core:
-  default_config_hash: _dXKfa4TH1nKFIWHVeaHrD5fRwoHVHXN81zeLZLC6OQ
+  default_config_hash: TdzgEMPRdkJp4-uEl8IYbht0VqlmLoizu3WCN3V6oeU
 name: 'PS Photo'
 type: ps_photo
 description: 'Image fetched from PhotoShelter.'

@@ -1,6 +1,5 @@
-photoshelter.admin:
-  title: 'PhotoShelter API Settings'
-  description: 'Edit settings to integrate the API.'
+photoshelter.form:
+  title: 'PhotoShelter API'
+  description: 'Set your PhotoShelter account credentials and API key'
+  route_name: photoshelter_config_form
   parent: system.admin_config_development
-  route_name: photoshelter.content
-  weight: 100
