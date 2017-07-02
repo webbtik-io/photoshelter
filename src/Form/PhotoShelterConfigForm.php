@@ -196,7 +196,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    *
    * @return bool
    */
-  private function getData(FormStateInterface &$form_state, DateTime $time, string $api_key) {
+  private function getData(
+    FormStateInterface &$form_state,
+    DateTime $time, string $api_key
+  ) {
     $this->authenticate($form_state);
     if (!$this->getCollections($api_key, $time)) {
       return FALSE;
@@ -273,7 +276,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         continue;
       }
 
-      $this->checkForDuplicates('collection', $collection['collection_id']);
+      $this->checkForDuplicates('collection',
+        $collection['collection_id']);
       $keyImageId = $this->getKeyImageId('collection',
         $collection['collection_id'], $api_key, $options);
       $link       = $this->getMediaLink('collection',
