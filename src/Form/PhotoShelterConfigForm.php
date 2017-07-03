@@ -145,10 +145,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $response = curl_exec($ch);
 
     if ($response === FALSE) {
-      curl_close($ch);
       $form_state->setError($form,
         'There was an error processing your login. Please try again.
         cURL Error: ' . curl_error($ch));
+      curl_close($ch);
     }
     else {
       curl_close($ch);
@@ -245,8 +245,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $response = curl_exec($ch);
     if ($response === FALSE) {
-      curl_close($ch);
       echo 'Error getting the list of collections:' . curl_error($ch);
+      curl_close($ch);
       exit(1);
     }
     curl_close($ch);
@@ -263,8 +263,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       curl_setopt_array($ch, $options);
       $collection = curl_exec($ch);
       if ($collection === FALSE) {
-        curl_close($ch);
         echo 'Error getting a single collection:' . curl_error($ch);
+        curl_close($ch);
         exit(1);
       }
       curl_close($ch);
@@ -339,8 +339,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $permission = curl_exec($ch);
     if ($permission === FALSE) {
-      curl_close($ch);
       echo "Error getting $media permission: " . curl_error($ch);
+      curl_close($ch);
       exit(1);
     }
     curl_close($ch);
@@ -405,8 +405,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $keyImage = curl_exec($ch);
     if ($keyImage === FALSE) {
-      curl_close($ch);
       echo "Error getting $media key image ID:" . curl_error($ch);
+      curl_close($ch);
       exit(1);
     }
     curl_close($ch);
@@ -433,8 +433,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $link = curl_exec($ch);
     if ($link === FALSE) {
-      curl_close($ch);
       echo "Error getting the $media link:" . curl_error($ch);
+      curl_close($ch);
       exit(1);
     }
     curl_close($ch);
@@ -467,8 +467,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $response = curl_exec($ch);
     if ($response === FALSE) {
-      curl_close($ch);
       echo 'Error getting the list of galleries:' . curl_error($ch);
+      curl_close($ch);
       exit(1);
     }
     curl_close($ch);
@@ -550,8 +550,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $parentCurl = curl_exec($ch);
     if ($parentCurl === FALSE) {
-      curl_close($ch);
       echo "Error getting the $media parent ID:" . curl_error($ch);
+      curl_close($ch);
       exit(1);
     }
     curl_close($ch);
@@ -584,8 +584,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $response = curl_exec($ch);
     if ($response === FALSE) {
-      curl_close($ch);
       echo 'Error getting the list of images:' . curl_error($ch);
+      curl_close($ch);
       exit(1);
     }
     curl_close($ch);
@@ -602,6 +602,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       curl_setopt_array($ch, $options);
       $image = curl_exec($ch);
       if ($image === FALSE) {
+        echo 'Error fetching a single image: ' . curl_error($ch);
         curl_close($ch);
         return FALSE;
       }
@@ -634,8 +635,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       curl_setopt_array($ch, $options);
       $link_response = curl_exec($ch);
       if ($link_response === FALSE) {
-        curl_close($ch);
         echo 'Error getting the image link:' . curl_error($ch);
+        curl_close($ch);
         exit(1);
       }
       curl_close($ch);
@@ -692,8 +693,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $permission = curl_exec($ch);
     if ($permission === FALSE) {
-      curl_close($ch);
       echo "Error getting image permission: " . curl_error($ch);
+      curl_close($ch);
       exit(1);
     }
     curl_close($ch);
