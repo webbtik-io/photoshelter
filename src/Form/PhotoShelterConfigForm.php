@@ -70,27 +70,27 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $form['email']     = [
       '#type'          => 'email',
       '#title'         => $this->t('The email associated with your PhotoShelter account.'),
-      '#default_value' => $config->get('email')
+      '#default_value' => $config->get('email'),
     ];
     $form['password']  = [
       '#type'          => 'password',
       '#title'         => $this->t('Your PhotoShelter account password.'),
-      '#default_value' => $config->get('password')
+      '#default_value' => $config->get('password'),
     ];
     $form['api_key']   = [
       '#type'          => 'textfield',
       '#title'         => $this->t('Your PhotoShelter API key'),
-      '#default_value' => $config->get('api_key')
+      '#default_value' => $config->get('api_key'),
     ];
     $form['sync_new']  = [
       '#type'   => 'submit',
       '#value'  => t('Sync New Additions'),
-      '#submit' => array('syncNewSubmit')
+      '#submit' => array('sync_new_submit'),
     ];
     $form['sync_full'] = [
       '#type'   => 'submit',
       '#value'  => 'Sync All Data',
-      '#submit' => array('syncAllSubmit')
+      '#submit' => array('sync_full_submit'),
     ];
     return $form;
   }
@@ -99,13 +99,27 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $this->authenticate($form_state);
+    $op = $form_state->getValue('op');
+    switch ($op) {
+      case 'Save configuration':
+        $this->authenticate($form, $form_state);
+        break;
+      case 'Sync All Data':
+        $this->authenticate($form, $form_state);
+        $this->sync_full_submit($form, $form_state);
+        break;
+      case 'Sync New Additions':
+        $this->authenticate($form, $form_state);
+        $this->sync_new_submit($form, $form_state);
+        break;
+    }
   }
 
   /**
+   * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  private function authenticate(FormStateInterface &$form_state) {
+  private function authenticate(array &$form, FormStateInterface &$form_state) {
     $email    = $form_state->getValue('email');
     $password = $form_state->getValue('password');
     $api_key  = $form_state->getValue('api_key');
@@ -118,12 +132,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // cURL to /psapi/v3/mem/authenticate to see if credentials are valid.
     $ch      = curl_init($fullUrl);
+    $cookie  = dirname(__FILE__) . '/cookie.txt';
     $options = [
       CURLOPT_RETURNTRANSFER => TRUE,
       CURLOPT_HEADER         => FALSE,
       CURLOPT_CONNECTTIMEOUT => 60,
       CURLOPT_TIMEOUT        => 60,
-      CURLOPT_COOKIEJAR      => realpath('../../files/cookie.txt'),
+      CURLOPT_COOKIEFILE     => $cookie,
+      CURLOPT_COOKIEJAR      => $cookie,
     ];
     curl_setopt_array($ch, $options);
     $response = curl_exec($ch);
@@ -144,22 +160,13 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = $this->config('photoshelter.settings');
-    $config->set('email', $form_state->getValue('email'));
-    $config->set('password', $form_state->getValue('password'));
-    $config->set('api_key', $form_state->getValue('api_key'));
-    $config->save();
-    parent::submitForm($form, $form_state);
-  }
-
-  /**
    * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  public function syncNewSubmit(array &$form, FormStateInterface $form_state) {
+  private function sync_full_submit(
+    array &$form,
+    FormStateInterface $form_state
+  ) {
     $config  = $this->config('photoshelter.settings');
     $api_key = $config->get('api_key');
     $time    = $config->get('last_sync');
@@ -179,7 +186,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
 
     //Get the data
-    if(!$this->getData($form_state, $time, $api_key)) {
+    if (!$this->getData($form, $form_state, $time, $api_key)) {
       $form_state->setError($form,
         'There was a problem fetching your PhotoShelter data.');
     }
@@ -190,6 +197,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   }
 
   /**
+   * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    * @param \DateTime $time
    * @param string $api_key
@@ -197,10 +205,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @return bool
    */
   private function getData(
-    FormStateInterface &$form_state,
+    array &$form, FormStateInterface &$form_state,
     DateTime $time, string $api_key
   ) {
-    $this->authenticate($form_state);
+    $this->authenticate($form, $form_state);
     if (!$this->getCollections($api_key, $time)) {
       return FALSE;
     }
@@ -222,12 +230,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   private function getCollections(string $api_key, DateTime $time) {
     $url     = "https://www.photoshelter.com/psapi/v3/mem/collection?api_key=$api_key";
     $user    = $this->currentUser();
+    $cookie  = dirname(__FILE__) . '/cookie.txt';
     $options = array(
       CURLOPT_RETURNTRANSFER => TRUE,
       CURLOPT_HEADER         => FALSE,
       CURLOPT_CONNECTTIMEOUT => 60,
       CURLOPT_TIMEOUT        => 60,
-      CURLOPT_COOKIEFILE     => realpath('../../files/cookie.txt'),
+      CURLOPT_COOKIEFILE     => $cookie,
+      CURLOPT_COOKIEJAR      => $cookie,
     );
 
     // Get list of collections
@@ -442,12 +452,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   private function getGalleries(string $api_key, DateTime $time) {
     $url     = "https://www.photoshelter.com/psapi/v3/mem/gallery?api_key=$api_key";
     $user    = $this->currentUser();
+    $cookie  = dirname(__FILE__) . '/cookie.txt';
     $options = array(
       CURLOPT_RETURNTRANSFER => TRUE,
       CURLOPT_HEADER         => FALSE,
       CURLOPT_CONNECTTIMEOUT => 60,
       CURLOPT_TIMEOUT        => 60,
-      CURLOPT_COOKIEFILE     => realpath('../../files/cookie.txt'),
+      CURLOPT_COOKIEFILE     => $cookie,
+      CURLOPT_COOKIEJAR      => $cookie,
     );
 
     // Get list of galleries
@@ -557,12 +569,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   private function getPhotos(string $api_key, DateTime $time) {
     $url     = "https://www.photoshelter.com/psapi/v3/mem/collection?api_key=$api_key";
     $user    = $this->currentUser();
+    $cookie  = dirname(__FILE__) . '/cookie.txt';
     $options = array(
       CURLOPT_RETURNTRANSFER => TRUE,
       CURLOPT_HEADER         => FALSE,
       CURLOPT_CONNECTTIMEOUT => 60,
       CURLOPT_TIMEOUT        => 60,
-      CURLOPT_COOKIEFILE     => realpath('../../files/cookie.txt'),
+      CURLOPT_COOKIEFILE     => $cookie,
+      CURLOPT_COOKIEJAR      => $cookie,
     );
 
     // Get list of images
@@ -720,19 +734,31 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  public function syncAllSubmit(array &$form, FormStateInterface $form_state) {
+  private function sync_new_submit(array &$form, FormStateInterface $form_state) {
     $time    = new DateTime('19700101');
     $config  = $this->config('photoshelter.settings');
     $api_key = $config->get('api_key');
 
     //Get the data
-    if (!$this->getData($form_state, $time, $api_key)) {
+    if (!$this->getData($form, $form_state, $time, $api_key)) {
       $form_state->setError($form,
         'There was a problem fetching your PhotoShelter data.');
     }
 
     // Update time saved in config
     $this->updateConfigPostSync(TRUE, $config);
+    parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    $config = $this->config('photoshelter.settings');
+    $config->set('email', $form_state->getValue('email'));
+    $config->set('password', $form_state->getValue('password'));
+    $config->set('api_key', $form_state->getValue('api_key'));
+    $config->save();
     parent::submitForm($form, $form_state);
   }
 
