@@ -36,7 +36,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    * @param \Drupal\Core\Database\Connection $connection
    */
-  public function __construct(ConfigFactoryInterface $config_factory, Connection $connection) {
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    Connection $connection
+  ) {
     parent::__construct($config_factory);
     $this->connection = $connection;
   }
@@ -110,7 +113,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         break;
       case 'Sync New Additions':
         $this->authenticate($form, $form_state);
-        $this->sync_new_submit($form, $form_state);
+        $this->sync_new_submit(TRUE, $form, $form_state);
         break;
     }
   }
@@ -192,11 +195,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
 
     // Update time saved in config
-    $this->updateConfigPostSync($config);
+    $this->updateConfigPostSync(TRUE, $config);
     parent::submitForm($form, $form_state);
   }
 
   /**
+   * @param bool $update
    * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    * @param \DateTime $time
@@ -206,28 +210,32 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    */
   private function getData(
     array &$form, FormStateInterface &$form_state,
-    DateTime $time, string $api_key
+    DateTime $time, string $api_key, bool $update = FALSE
   ) {
     $this->authenticate($form, $form_state);
-    if (!$this->getCollections($api_key, $time)) {
+    if (!$this->getCollections($update, $api_key, $time)) {
       return FALSE;
     }
-    if (!$this->getGalleries($api_key, $time)) {
+    if (!$this->getGalleries($update, $api_key, $time)) {
       return FALSE;
     }
-    if (!$this->getPhotos($api_key, $time)) {
+    if (!$this->getPhotos($update, $api_key, $time)) {
       return FALSE;
     }
     return TRUE;
   }
 
   /**
+   * @param bool $update
    * @param string $api_key
    * @param \DateTime $time
    *
    * @return bool
    */
-  private function getCollections(string $api_key, DateTime $time) {
+  private function getCollections(
+    bool $update = FALSE,
+    string $api_key, DateTime $time
+  ) {
     $url     = "https://www.photoshelter.com/psapi/v3/mem/collection?api_key=$api_key";
     $user    = $this->currentUser();
     $cookie  = dirname(__FILE__) . '/cookie.txt';
@@ -282,8 +290,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $collectionTime = DateTime::createFromFormat(
         'YY"-"MM"-"DD" "HH":"II":"SS" "tz', $collection['modified_at'],
         new DateTimeZone('GMT'));
-      if ($collectionTime < $time) {
-        continue;
+      if ($update) {
+        if ($collectionTime < $time) {
+          continue;
+        }
       }
 
       $this->checkForDuplicates('collection',
@@ -304,7 +314,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'promote'             => 0,
         'comment'             => 0,
         'created'             => \Drupal::time()->getRequestTime(),
-        'field_cas_required'  => $cas_required,
+        // 'field_cas_required'  => $cas_required,
         'field_collection_id' => $collection['collection_id'],
         'field_description'   => $collection['description'],
         'field_key_image_id'  => $keyImageId,
@@ -364,18 +374,18 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    */
   private function checkForDuplicates(string $media, string $id) {
     // Check for duplicate nodes
-    $query = $this->connection->prepareQuery(
-      'SELECT n.field_' . $media . '_id_value FROM {node__field_image_id} n WHERE n.field_image_id_value = ' . $id
-    );
     try {
-      $result = $this->connection->query($query);
+      $results = $this->connection
+        ->select('node__field_' . $media . '_id', 'f')
+        ->fields('f', ['field_' . $media . '_id_value'])
+        ->condition('f.field_' . $media . '_id_value', $id, '=');
     } catch (Exception $e) {
       $e->getMessage();
       exit(1);
     }
+
     // If a match is found, delete the old node
-    if ($result->rowCount() > 0) {
-      $row       = $result->fetchAssoc();
+    foreach ($results as $row) {
       $entity_id = $row['entity_id'];
       $node      = Node::load($entity_id);
       try {
@@ -444,12 +454,16 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   }
 
   /**
+   * @param bool $update
    * @param string $api_key
    * @param \DateTime $time
    *
    * @return bool
    */
-  private function getGalleries(string $api_key, DateTime $time) {
+  private function getGalleries(
+    bool $update = FALSE,
+    string $api_key, DateTime $time
+  ) {
     $url     = "https://www.photoshelter.com/psapi/v3/mem/gallery?api_key=$api_key";
     $user    = $this->currentUser();
     $cookie  = dirname(__FILE__) . '/cookie.txt';
@@ -488,8 +502,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $galleryTime = DateTime::createFromFormat(
         'YY"-"MM"-"DD" "HH":"II":"SS" "tz', $gallery['modified_at'],
         new DateTimeZone('GMT'));
-      if ($galleryTime < $time) {
-        continue;
+      if ($update) {
+        if ($galleryTime < $time) {
+          continue;
+        }
       }
 
       $this->checkForDuplicates('gallery', $gallery['gallery_id']);
@@ -561,13 +577,17 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   }
 
   /**
+   * @param bool $update
    * @param string $api_key
    * @param \DateTime $time
    *
    * @return bool
    */
-  private function getPhotos(string $api_key, DateTime $time) {
-    $url     = "https://www.photoshelter.com/psapi/v3/mem/collection?api_key=$api_key";
+  private function getPhotos(
+    bool $update = FALSE,
+    string $api_key, DateTime $time
+  ) {
+    $url     = "https://www.photoshelter.com/psapi/v3/mem/image?api_key=$api_key";
     $user    = $this->currentUser();
     $cookie  = dirname(__FILE__) . '/cookie.txt';
     $options = array(
@@ -614,8 +634,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $imageTime = DateTime::createFromFormat(
         'YY"-"MM"-"DD" "HH":"II":"SS" "tz', $image['modified_at'],
         new DateTimeZone('GMT'));
-      if ($imageTime < $time) {
-        continue;
+      if ($update) {
+        if ($imageTime < $time) {
+          continue;
+        }
       }
 
       $this->checkForDuplicates('image', $image['image_id']);
@@ -732,22 +754,26 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   }
 
   /**
+   * @param bool $update
    * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  private function sync_new_submit(array &$form, FormStateInterface $form_state) {
+  private function sync_new_submit(
+    bool $update = FALSE,
+    array &$form, FormStateInterface $form_state
+  ) {
     $time    = new DateTime('19700101');
     $config  = $this->config('photoshelter.settings');
     $api_key = $config->get('api_key');
 
     //Get the data
-    if (!$this->getData($form, $form_state, $time, $api_key)) {
+    if (!$this->getData($form, $form_state, $time, $api_key, $update)) {
       $form_state->setError($form,
         'There was a problem fetching your PhotoShelter data.');
     }
 
     // Update time saved in config
-    $this->updateConfigPostSync(TRUE, $config);
+    $this->updateConfigPostSync($config);
     parent::submitForm($form, $form_state);
   }
 
