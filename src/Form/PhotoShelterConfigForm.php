@@ -88,12 +88,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $form['sync_new']  = [
       '#type'   => 'submit',
       '#value'  => t('Sync New Additions'),
-      '#submit' => array('sync_new_submit'),
     ];
     $form['sync_full'] = [
       '#type'   => 'submit',
       '#value'  => 'Sync All Data',
-      '#submit' => array('sync_full_submit'),
     ];
     return $form;
   }
@@ -219,9 +217,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     if (!$this->getGalleries($update, $api_key, $time)) {
       return FALSE;
     }
-    if (!$this->getPhotos($update, $api_key, $time)) {
-      return FALSE;
-    }
     return TRUE;
   }
 
@@ -279,12 +274,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $collection = json_decode($collection, TRUE);
       $collection = $collection['data']['Collection'];
 
-      // Check if it is meant to be public
-      $cas_required = $this->getPermission('collection',
-        $collection['collection_id'], $api_key, $options);
-      if ($collection['f_list'] == 'f' || $cas_required == 'skip') {
+      // Check if it is meant to be public and set permissions
+      if ($collection['f_list'] == 'f') {
         continue;
       }
+      $cas_required = $this->getPermission('collection',
+        $collection['collection_id'], $api_key, $options);
 
       // Check if modified time is after time
       $collectionTime = DateTime::createFromFormat(
@@ -314,7 +309,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'promote'             => 0,
         'comment'             => 0,
         'created'             => \Drupal::time()->getRequestTime(),
-        // 'field_cas_required'  => $cas_required,
+        'field_cas_required'  => $cas_required,
         'field_collection_id' => $collection['collection_id'],
         'field_description'   => $collection['description'],
         'field_key_image_id'  => $keyImageId,
@@ -324,7 +319,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       try {
         $node->save();
       } catch (Exception $e) {
-        $e->getMessage();
+        echo $e->getMessage();
         exit(1);
       }
     }
@@ -357,11 +352,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $permission       = json_decode($permission, TRUE);
     $permissionStatus = $permission['data']['Permission']['mode'];
     switch ($permissionStatus) {
-      case 'private':
-        return 'skip';
       case 'permission':
         return TRUE;
       case 'public':
+        return FALSE;
+      case 'everyone':
         return FALSE;
       default:
         return TRUE;
@@ -380,7 +375,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         ->fields('f', ['field_' . $media . '_id_value'])
         ->condition('f.field_' . $media . '_id_value', $id, '=');
     } catch (Exception $e) {
-      $e->getMessage();
+      echo $e->getMessage();
       exit(1);
     }
 
@@ -391,7 +386,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       try {
         $node->delete();
       } catch (Exception $e) {
-        $e->getMessage();
+        echo $e->getMessage();
         exit(1);
       }
     }
@@ -425,7 +420,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     return $keyImageId;
   }
 
-  /**
+  /*
    * @param string $media
    * @param string $id
    * @param string $api_key
@@ -449,7 +444,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
     curl_close($ch);
     $link    = json_decode($link, TRUE);
-    $linkUrl = $link['data']['CollectionLink']['url'];
+    $media   = ucfirst($media);
+    $linkUrl = $link['data'][$media . 'Link']['url'];
     return $linkUrl;
   }
 
@@ -492,11 +488,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $galleries = $response['data']['Gallery'];
     foreach ($galleries as $gallery) {
       // Check if it is meant to be public
-      $cas_required = $this->getPermission('gallery',
-        $gallery['gallery_id'], $api_key, $options);
-      if ($gallery['f_list'] == 'f' || $cas_required == 'skip') {
+      if ($gallery['f_list'] == 'f') {
         continue;
       }
+      $cas_required = $this->getPermission('gallery',
+        $gallery['gallery_id'], $api_key, $options);
 
       // Check if modified time is after time
       $galleryTime = DateTime::createFromFormat(
@@ -540,8 +536,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       try {
         $node->save();
       } catch (Exception $e) {
-        $e->getMessage();
+        echo $e->getMessage();
         exit(1);
+      }
+      if (!$this->getPhotos($gallery['gallery_id'], $cas_required, $api_key, $time, $update)) {
+        return FALSE;
       }
     }
 
@@ -577,6 +576,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   }
 
   /**
+   * @param string $parentId
+   * @param bool $parentCas
    * @param bool $update
    * @param string $api_key
    * @param \DateTime $time
@@ -584,10 +585,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @return bool
    */
   private function getPhotos(
-    bool $update = FALSE,
-    string $api_key, DateTime $time
+    string $parentId, bool $parentCas, string $api_key, DateTime $time, bool $update = FALSE
   ) {
-    $url     = "https://www.photoshelter.com/psapi/v3/mem/image?api_key=$api_key";
+    $url     = "https://www.photoshelter.com/psapi/v3/mem/gallery/$parentId/images?api_key=$api_key";
     $user    = $this->currentUser();
     $cookie  = dirname(__FILE__) . '/cookie.txt';
     $options = array(
@@ -604,7 +604,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     curl_setopt_array($ch, $options);
     $response = curl_exec($ch);
     if ($response === FALSE) {
-      echo 'Error getting the list of images:' . curl_error($ch);
+      echo "Error getting the list of images for gallery $parentId:" . curl_error($ch);
       curl_close($ch);
       exit(1);
     }
@@ -612,8 +612,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // Cycle through all images
     $response = json_decode($response, TRUE);
-    $images   = $response['data']['Collection'];
+    $images   = $response['data']['GalleryImage'];
     foreach ($images as $image) {
+      // Skip if image isn't public
+      if ($image['f_visible'] == 'f') {
+        continue;
+      }
       $imageId = $image['image_id'];
       $url     = "https://www.photoshelter.com/psapi/v3/mem/image/$imageId?api_key=$api_key";
 
@@ -632,7 +636,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
       // Check if modified time is after time
       $imageTime = DateTime::createFromFormat(
-        'YY"-"MM"-"DD" "HH":"II":"SS" "tz', $image['modified_at'],
+        'YY"-"MM"-"DD" "HH":"II":"SS" "tz', $image['updated_at'],
         new DateTimeZone('GMT'));
       if ($update) {
         if ($imageTime < $time) {
@@ -640,24 +644,16 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         }
       }
 
-      $this->checkForDuplicates('image', $image['image_id']);
-
-      // Get image parent id
-      $parentId = $this->getParentId('image',
-        $image['image_id'], $api_key, $options);
-
-      // Get image permission
-      $cas_required = $this->getImagePermission($image['image_id'],
-        $parentId, $api_key, $options);
+      $this->checkForDuplicates('image', $imageId);
 
       // Get image links
-      $url = 'https://www.photoshelter.com/psapi/v3/mem/$mage/'
-             . $image['image_id'] . '/link?api_key=' . $api_key;
+      $url = 'https://www.photoshelter.com/psapi/v3/mem/image/'
+             . $imageId . '/link?api_key=' . $api_key;
       $ch  = curl_init($url);
       curl_setopt_array($ch, $options);
       $link_response = curl_exec($ch);
       if ($link_response === FALSE) {
-        echo 'Error getting the image link:' . curl_error($ch);
+        echo "Error getting the image link ($url):" . curl_error($ch);
         curl_close($ch);
         exit(1);
       }
@@ -677,8 +673,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'promote'            => 0,
         'comment'            => 0,
         'created'            => \Drupal::time()->getRequestTime(),
-        'field_cas_required' => $cas_required,
-        'field_image_id'     => $image['image_id'],
+        'field_cas_required' => $parentCas,
+        'field_image_id'     => $imageId,
         'field_file_name'    => $image['file_name'],
         'field_parent_id'    => $parentId,
         'field_auth_link'    => $auth_link,
@@ -687,47 +683,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       try {
         $node->save();
       } catch (Exception $e) {
-        $e->getMessage();
+        echo $e->getMessage();
         exit(1);
       }
     }
 
     return TRUE;
-  }
-
-  /**
-   * @param string $imageId
-   * @param string $galleryId
-   * @param string $api_key
-   * @param array $options
-   *
-   * @return bool
-   */
-  private function getImagePermission(
-    string $imageId, string $galleryId,
-    string $api_key, array &$options
-  ) {
-    $galleryPermission = $this->getPermission('gallery',
-      $galleryId, $api_key, $options);
-
-    $url = "https://www.photoshelter.com/psapi/v3/mem/image/$imageId/public?api_key=$api_key";
-    $ch  = curl_init($url);
-    curl_setopt_array($ch, $options);
-    $permission = curl_exec($ch);
-    if ($permission === FALSE) {
-      echo "Error getting image permission: " . curl_error($ch);
-      curl_close($ch);
-      exit(1);
-    }
-    curl_close($ch);
-    $permission       = json_decode($permission, TRUE);
-    $permissionStatus = $permission['data']['Image']['is_public'];
-    if ($galleryPermission && $permissionStatus == 't') {
-      return FALSE;
-    }
-    else {
-      return TRUE;
-    }
   }
 
   /**
