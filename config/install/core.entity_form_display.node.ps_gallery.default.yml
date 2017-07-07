@@ -7,7 +7,6 @@ dependencies:
     - field.field.node.ps_gallery.field_gallery_id
     - field.field.node.ps_gallery.field_gallery_name
     - field.field.node.ps_gallery.field_key_image_id
-    - field.field.node.ps_gallery.field_link
     - field.field.node.ps_gallery.field_parent_id
     - node.type.ps_gallery
   module:
@@ -49,14 +48,6 @@ content:
     region: content
   field_key_image_id:
     weight: 34
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_link:
-    weight: 35
     settings:
       size: 60
       placeholder: ''

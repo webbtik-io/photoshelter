@@ -6,8 +6,8 @@ dependencies:
     - field.field.node.ps_collection.field_collection_id
     - field.field.node.ps_collection.field_description
     - field.field.node.ps_collection.field_key_image_id
-    - field.field.node.ps_collection.field_link
     - field.field.node.ps_collection.field_name
+    - field.field.node.ps_collection.field_parent_id
     - node.type.ps_collection
   module:
     - path
@@ -53,16 +53,16 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_link:
-    weight: 36
+  field_name:
+    weight: 32
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_name:
-    weight: 32
+  field_parent_id:
+    weight: 36
     settings:
       size: 60
       placeholder: ''

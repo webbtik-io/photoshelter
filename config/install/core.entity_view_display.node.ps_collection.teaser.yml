@@ -6,6 +6,7 @@ dependencies:
     - field.field.node.ps_collection.field_cas_required
     - field.field.node.ps_collection.field_collection_id
     - field.field.node.ps_collection.field_description
+    - field.field.node.ps_collection.field_key_image_id
     - field.field.node.ps_collection.field_name
     - node.type.ps_collection
   module:
@@ -22,4 +23,5 @@ hidden:
   field_cas_required: true
   field_collection_id: true
   field_description: true
+  field_key_image_id: true
   field_name: true
