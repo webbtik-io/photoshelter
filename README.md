@@ -1,5 +1,5 @@
 # PhotoShelter API
-A Drupal 8 module to consume PhotoShelter API's.
+> A Drupal 8 module to consume PhotoShelter API's.
 
-##Dependencies
+## Dependencies
 - You will need to create a blank text file in `src/Form` called `cookie.txt`.
