@@ -304,18 +304,19 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $cChildren = $collection['Children'];
     unset($collection);
 
-    /* $this->memoryUsage[] = memory_get_peak_usage(true);
-    var_dump($this->memoryUsage); */
+    //$this->memoryUsage[] = memory_get_peak_usage(true);
+    //var_dump($this->memoryUsage);
     if ($cPermission === NULL) {
       $fCollections = $this->flistCollections;
       foreach ($fCollections as $fcollection) {
+        //$this->memoryUsage[] = memory_get_peak_usage(true);
         if ($fcollection['collection_id'] === $collectionId) {
           if ($fcollection['Permission']['mode'] === 'private') {
             return;
           }
         }
         unset($fcollection);
-        unset($fCollections);
+        // unset($fCollections);
       }
     }
     else if ($cPermission === 'private') {
@@ -325,8 +326,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $cas_required = $this->getPermission($cPermission, $collectionFlist);
     }
     unset($this->flistCollections);
-    /* $this->memoryUsage[] = memory_get_peak_usage(true);
-    var_dump($this->memoryUsage); */
+    //$this->memoryUsage[] = memory_get_peak_usage(true);
+    //var_dump($this->memoryUsage);
 
     // Check if modified time is after time
     $collectionTime = DateTime::createFromFormat(
@@ -338,7 +339,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       }
     }
 
-    $this->checkForDuplicates('collection', $collectionId);
+    //$this->checkForDuplicates('collection', $collectionId);
 
     // Create node from $collection and $keyImageId
     $node = Node::create([
@@ -451,7 +452,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       }
     }
 
-    $this->checkForDuplicates('gallery', $galleryId);
+    //$this->checkForDuplicates('gallery', $galleryId);
 
     // Create node
     $node = Node::create([
@@ -529,7 +530,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         }
       }
 
-      $this->checkForDuplicates('image', $imageId);
+      //$this->checkForDuplicates('image', $imageId);
 
       // Create node from $image and $keyImageId
       $node = Node::create([
@@ -616,7 +617,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param string $media
    * @param string $id
    */
-  private function checkForDuplicates(string $media, string &$id) {
+  /*private function checkForDuplicates(string $media, string &$id) {
     // Check for duplicate nodes
     try {
       $results = $this->connection
@@ -640,7 +641,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       }
       unset($row);
     }
-  }
+  }*/
 
   /**
    * @param bool $isFullSync
