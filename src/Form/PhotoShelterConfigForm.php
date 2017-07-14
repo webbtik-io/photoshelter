@@ -46,10 +46,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   public function __construct(ConfigFactoryInterface $config_factory,
     Connection $connection) {
     parent::__construct($config_factory);
-    $config = $this->config('photoshelter.settings');
-    $this->connection = $connection;
-    $this->cookie = dirname(__FILE__) . '/cookie.txt';
-    $this->api_key = urlencode($config->get('api_key'));
     $this->options = [
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
@@ -60,6 +56,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       CURLOPT_COOKIEFILE     => $this->cookie,
       CURLOPT_COOKIEJAR      => $this->cookie,
     ];
+    $config = $this->config('photoshelter.settings');
+    $this->connection = $connection;
+    $this->cookie = dirname(__FILE__) . '/cookie.txt';
+    $this->api_key = urlencode($config->get('api_key'));
     $this->uid = $this->currentUser()->id();
     $this->flistCollections = $this->getFlistCollections();
   }
