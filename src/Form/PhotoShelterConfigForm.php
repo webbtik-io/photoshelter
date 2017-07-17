@@ -46,6 +46,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   public function __construct(ConfigFactoryInterface $config_factory,
     Connection $connection) {
     parent::__construct($config_factory);
+    $this->cookie = dirname(__FILE__) . '/cookie.txt';
     $this->options = [
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
@@ -58,10 +59,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     ];
     $config = $this->config('photoshelter.settings');
     $this->connection = $connection;
-    $this->cookie = dirname(__FILE__) . '/cookie.txt';
     $this->api_key = urlencode($config->get('api_key'));
     $this->uid = $this->currentUser()->id();
-    $this->flistCollections = $this->getFlistCollections();
   }
 
   /**
@@ -127,10 +126,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         break;
       case 'Sync All Data':
         $this->authenticate($form, $form_state);
+        $this->flistCollections = $this->getFlistCollections();
         $this->sync_full_submit($form, $form_state);
         break;
       case 'Sync New Additions':
         $this->authenticate($form, $form_state);
+        $this->flistCollections = $this->getFlistCollections();
         $this->sync_new_submit($form, $form_state, TRUE);
         break;
     }
@@ -161,6 +162,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    */
   private function sync_full_submit(array &$form,
     FormStateInterface $form_state) {
+    $config = $this->config('photoshelter.settings');
 
     $time = new DateTime(19700101);
 
@@ -179,7 +181,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    */
   private function sync_new_submit(array &$form,
     FormStateInterface $form_state, bool $update = FALSE) {
-    $time = $this->config('photoshelter.settings')->get('last_sync');
+    $config = $this->config('photoshelter.settings');
+    $time = $config->get('last_sync');
 
     // Get the date
     if ($time === 'Never') {
