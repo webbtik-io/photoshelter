@@ -5,6 +5,10 @@
  * Contains Drupal\photoshelter\Form\PhotoShelterConfigForm
  */
 
+// TODO: Check for Duplicates
+// TODO: Fix permissions
+// TODO: Fix Memory Leak
+
 namespace Drupal\photoshelter\Form;
 
 use DateTime;
@@ -341,7 +345,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $cPermission = $collection['Permission']['mode'];
     $collectionId = $collection['collection_id'];
     $collectionName = $collection['name'];
-    // $collectionFlist = $collection['f_list'];
+    $collectionFlist = $collection['f_list'];
     $cModified = $collection['modified_at'];
     $cDescription = $collection['description'];
     $cKeyImage = $collection['KeyImage']['image_id'];
@@ -369,7 +373,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       return;
     }
     else {
-      // $cas_required = $this->getPermission($cPermission, $collectionFlist);
+      $cas_required = $this->getPermission($cPermission, $collectionFlist);
     }
     unset($this->flistCollections);
     // $this->memoryUsage[] = memory_get_peak_usage(true);
