@@ -8,6 +8,7 @@
 // TODO: Check for Duplicates
 // TODO: Fix permissions
 // TODO: Fix Memory Leak
+// TODO: Fix adding duplicated
 
 namespace Drupal\photoshelter\Form;
 
@@ -342,7 +343,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     bool $update, string $parentId = NULL) {
     // Check if it is meant to be public and set permissions
     $cas_required = TRUE;
-    $cPermission = $collection['Permission']['mode'];
+    $cPermission = $collection['Visibility']['mode'];
     $collectionId = $collection['collection_id'];
     $collectionName = $collection['name'];
     $collectionFlist = $collection['f_list'];
