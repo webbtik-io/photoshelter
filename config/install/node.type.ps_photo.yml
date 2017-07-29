@@ -10,7 +10,7 @@ third_party_settings:
     parent: 'main:'
 name: 'PS Photo'
 type: ps_photo
-description: 'Image fetched from PhotoShelter.'
+description: 'Photos from your PhotoShelter'
 help: ''
 new_revision: true
 preview_mode: 1

@@ -1,12 +1,27 @@
 <?php
 
 /**
+ * Copyright 2017 Brigham Young University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * @file
  * Contains Drupal\photoshelter\Form\PhotoShelterConfigForm
  */
 
 // TODO: Check for Duplicates
-// TODO: Fix permissions
 // TODO: Fix Memory Leak
 // TODO: Fix adding duplicated
 
@@ -20,6 +35,7 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\Entity\Node;
+use Drupal\file\Entity\File;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -36,10 +52,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   protected $connection;
   protected $user;
   private $cookie;
-  private $flistCollections;
+  // private $flistCollections;
   private $api_key;
   private $options;
-  private $memoryUsage;
+  // private $memoryUsage;
   private $uid;
 
   /**
@@ -133,12 +149,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         break;
       case 'Sync All Data':
         $this->authenticate($form, $form_state);
-        $this->flistCollections = $this->getFlistCollections();
+        // $this->flistCollections = $this->getFlistCollections();
         $this->sync_full_submit($form, $form_state);
         break;
       case 'Sync New Additions':
         $this->authenticate($form, $form_state);
-        $this->flistCollections = $this->getFlistCollections();
+        // $this->flistCollections = $this->getFlistCollections();
         $this->sync_new_submit($form, $form_state, TRUE);
         break;
     }
@@ -269,7 +285,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    */
   private function getCollections(DateTime &$time, bool $update) {
     // Get collection and gallery data
-    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection?fields=collection_id,name,description,f_list,modified_at&api_key=$this->api_key&extend={%22Permission%22:%20{%22fields%22:%20%22mode%22,%22params%22:%20{}},%22KeyImage%22:%20{%22fields%22:%20%22image_id,gallery_id%22,%22params%22:%20{}},%22Visibility%22:%20{%22fields%22:%20%22mode%22,%22params%22:%20{}},%22Children%22:%20{%22Gallery%22:%20{%22fields%22:%20%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:%20{}},%22Collection%22:%20{%22fields%22:%20%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:%20{}}}}");
+    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection?fields=collection_id,name,description,f_list,modified_at&api_key=6CmmdvcipQw&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
     curl_setopt_array($curl, $this->options);
 
     $response = curl_exec($curl);
@@ -287,6 +303,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // Cycle through all collections
     foreach ($collections as $collection) {
+      if ($collection['f_list'] === 'f') {
+        unset($collection);
+        continue;
+      }
       $this->getOneCollection($collection, $time, $update);
       unset($collection);
     }
@@ -301,7 +321,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    */
   private function getOneCollection(array &$collection, DateTime &$time,
     bool $update, string $parentId = NULL) {
-    $this->saveOneCollection($collection, $time, $update, $parentId);
+    $this->saveOneCollection($collection, $time, $update, $collection['Permission']['mode'], $parentId);
   }
 
   /**
@@ -314,7 +334,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   private function curlOneCollection(string $collectionId, DateTime &$time,
     bool $update, string $parentId = NULL) {
 
-    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection/$collectionId?api_key=6CmmdvcipQw&fields=collection_id,name,description,f_list,mode,modified_at&extend={%22KeyImage%22:%20{%22fields%22:%20%22image_id,gallery_id%22,%22params%22:%20{}},%22Visibility%22:%20{%22fields%22:%20%22mode%22,%22params%22:%20{}},%22Children%22:%20{%22Gallery%22:%20{%22fields%22:%20%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:%20{}},%22Collection%22:%20{%22fields%22:%20%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:%20{}}}}");
+    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection/$collectionId?api_key=6CmmdvcipQw&fields=collection_id,name,description,f_list,mode,modified_at&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
     curl_setopt_array($curl, $this->options);
 
     $response = curl_exec($curl);
@@ -328,7 +348,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     $jsonResponse = json_decode($response, TRUE);
     $collection = $jsonResponse['data']['Collection'];
-    $this->saveOneCollection($collection, $time, $update, $parentId);
+    if ($collection['f_list'] === 'f') {
+      unset($collection);
+      return;
+    }
+    $this->saveOneCollection($collection, $time, $update, $collection['Visibility']['mode'], $parentId);
+    unset($collection);
   }
 
 
@@ -336,49 +361,23 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param array $collection
    * @param \DateTime $time
    * @param bool $update
+   * @param string $cPermission
    * @param string|NULL $parentId
    */
 
   private function saveOneCollection(array &$collection, DateTime &$time,
-    bool $update, string $parentId = NULL) {
+    bool $update, string $cPermission, string $parentId = NULL) {
     // Check if it is meant to be public and set permissions
-    $cas_required = TRUE;
-    $cPermission = $collection['Visibility']['mode'];
     $collectionId = $collection['collection_id'];
     $collectionName = $collection['name'];
-    $collectionFlist = $collection['f_list'];
     $cModified = $collection['modified_at'];
     $cDescription = $collection['description'];
     $cKeyImage = $collection['KeyImage']['image_id'];
     $cChildren = $collection['Children'];
+    $cKeyImageFile = $collection['KeyImage']['ImageLink']['auth_link'];
     unset($collection);
 
-    $this->memoryUsage[] = memory_get_peak_usage(true);
-    var_dump($this->memoryUsage);
-    if ($cPermission === NULL) {
-      foreach ($this->flistCollections as $fcollection) {
-        if ($fcollection['collection_id'] === $collectionId) {
-          if ($fcollection['Permission']['mode'] === 'private') {
-            unset($fcollection);
-            unset($this->flistCollections);
-            return;
-          }
-        }
-        unset($fcollection);
-      }
-      $this->memoryUsage[] = memory_get_peak_usage(true);
-      var_dump($this->memoryUsage);
-    }
-    else if ($cPermission === 'private') {
-      unset($this->flistCollections);
-      return;
-    }
-    else {
-      $cas_required = $this->getPermission($cPermission, $collectionFlist);
-    }
-    unset($this->flistCollections);
-    // $this->memoryUsage[] = memory_get_peak_usage(true);
-    // var_dump($this->memoryUsage);
+    $cas_required = $this->getPermission($cPermission);
 
     // Check if modified time is after time
     $collectionTime = DateTime::createFromFormat(
@@ -394,6 +393,15 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     //$this->checkForDuplicates('collection', $collectionId);
 
+    $file = File::create([
+      'fid' => $collectionId,
+      'uid' => $this->uid,
+      'filename' => $collectionName,
+      'uri' => $cKeyImageFile,
+      'status' => 1,
+    ]);
+    $file->save();
+
     // Create node from $collection and $keyImageId
     $node = Node::create([
       'nid'                 => NULL,
@@ -407,10 +415,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'created'             => \Drupal::time()->getRequestTime(),
       'field_cas_required'  => $cas_required,
       'field_collection_id' => $collectionId,
-      'field_description'   => $cDescription,
+      'field_gallery_description'   => $cDescription,
       'field_key_image_id'  => $cKeyImage,
+      'field_key_image_file' => ['target_id' => $file->id()],
       'field_name'          => $collectionName,
-      'field_parent_id'     => $parentId
+      'field_parent_id_2'     => $parentId,
     ]);
     try {
       $node->save();
@@ -418,6 +427,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       echo $e->getMessage();
       exit(1);
     }
+    unset($file);
     unset($node);
 
     // Create nodes for children
@@ -432,12 +442,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
             break;
           case 'Collection':
             foreach ($child as $childCollection) {
-              // $this->memoryUsage[] = memory_get_peak_usage(true);
-              // var_dump($this->memoryUsage);
               $this->curlOneCollection($childCollection['collection_id'], $time,
                 $update, $collectionId);
-              // $this->memoryUsage[] = memory_get_peak_usage(true);
-              // var_dump($this->memoryUsage);
               unset($childCollection);
             }
             unset($collection);
@@ -451,7 +457,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
   private function getGalleries(DateTime &$time, bool $update) {
     // Get list of galleries
-    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery?fields=gallery_id,name,description,f_list,modified_at&extend={%22Parents%22:{%22fields%22:%22collection_id%22,%22params%22:{}}}&api_key=$this->api_key");
+    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery?fields=gallery_id,name,description,f_list,modified_at&extend={%22Parents%22:{%22fields%22:%22collection_id%22,%22params%22:{}},%22KeyImage%22:{%22fields%22:%22image_id%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{}}}&api_key=$this->api_key");
     curl_setopt_array($curl, $this->options);
     $response = curl_exec($curl);
     $err = curl_error($curl);
@@ -467,7 +473,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $galleryParent = $galleries['Parents']['collection_id'];
 
     foreach ($galleries as $gallery) {
-      if (isset($galleryParent)) {
+      if ($gallery['f_list'] === 'f') {
+        unset($gallery);
+        continue;
+      }
+      else if (!isset($galleryParent)) {
         $this->getGallery($gallery, $time, $update);
       }
       unset($gallery);
@@ -485,19 +495,15 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   private function getGallery(array &$gallery, DateTime &$time,
     bool $update, string &$parentId = NULL) {
     $galleryPermission = $gallery['Visibility']['mode'];
-    $galleryFlist = $gallery['f_list'];
     $galleryId = $gallery['gallery_id'];
     $galleryModified = $gallery['modified_at'];
     $galleryName = $gallery['name'];
     $galleryDescription = $gallery['description'];
     $galleryImage = $gallery['KeyImage']['image_id'];
+    $galleryImageFile = $gallery['KeyImage']['ImageLink']['auth_link'];
     unset($gallery);
 
-    // Check if it should be private
-    if ($galleryPermission === 'private') {
-      return;
-    }
-    $cas_required = $this->getPermission($galleryPermission, $galleryFlist);
+    $cas_required = $this->getPermission($galleryPermission);
 
     // Check if modified time is after time
     $galleryTime = DateTime::createFromFormat(
@@ -510,6 +516,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
 
     //$this->checkForDuplicates('gallery', $galleryId);
+
+    $file = File::create([
+      'uid' => $galleryId,
+      'filename' => $galleryName,
+      'uri' => $galleryImageFile,
+      'status' => 1,
+    ]);
+    $file->save();
 
     // Create node
     $node = Node::create([
@@ -526,8 +540,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'field_gallery_id'          => $galleryId,
       'field_gallery_description' => $galleryDescription,
       'field_key_image_id'        => $galleryImage,
+      'field_key_image_file'      => $galleryImageFile,
       'field_gallery_name'        => $galleryName,
-      'field_parent_id'           => $parentId,
+      'field_parent_id_2'           => $parentId,
     ]);
     try {
       $node->save();
@@ -535,6 +550,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       echo $e->getMessage();
       exit(1);
     }
+    unset($file);
     unset($node);
 
     $this->getPhotos($galleryId, $cas_required, $time, $update);
@@ -605,7 +621,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'field_file_name'    => $imageName,
         'field_parent_id'    => $parentId,
         'field_auth_link'    => $imageAuthLink,
-        'field_link'         => $imageLink,
+        'field_link_link'         => $imageLink,
       ]);
       try {
         $node->save();
@@ -620,7 +636,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   /**
    * @return array
    */
-  private function getFlistCollections() {
+  /* private function getFlistCollections() {
     $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection?api_key=$this->api_key&fields=collection_id,f_list&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}}}");
     curl_setopt_array($curl, $this->options);
     $response = curl_exec($curl);
@@ -642,28 +658,20 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
     unset($collections);
     return $flistCollections;
-  }
+  } */
 
   /**
    * @param string $permission
-   * @param string $f_list
    *
    * @return bool
    */
-  private function getPermission(string &$permission, string &$f_list) {
-    if ($f_list === 'f') {
-      return TRUE;
-    }
+  private function getPermission(string &$permission) {
     switch ($permission) {
       case 'private':
-        return TRUE;
-        break;
-      case 'everyone':
-        return FALSE;
-        break;
       case 'permission':
         return TRUE;
         break;
+      case 'everyone':
       case 'public':
         return FALSE;
         break;
