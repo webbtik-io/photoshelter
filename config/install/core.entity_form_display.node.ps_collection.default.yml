@@ -11,6 +11,7 @@ dependencies:
     - field.field.node.ps_collection.field_parent_id
     - node.type.ps_collection
   module:
+    - file
     - path
 id: node.ps_collection.default
 targetEntityType: node
@@ -47,12 +48,11 @@ content:
     type: string_textfield
     region: content
   field_key_image_file:
-    weight: 35
+    weight: 39
     settings:
-      size: 60
-      placeholder: ''
+      progress_indicator: throbber
     third_party_settings: {  }
-    type: string_textfield
+    type: file_generic
     region: content
   field_key_image_id:
     weight: 34

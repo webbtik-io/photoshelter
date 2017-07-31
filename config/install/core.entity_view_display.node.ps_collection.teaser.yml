@@ -3,6 +3,12 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.ps_collection.field_cas_required
+    - field.field.node.ps_collection.field_description
+    - field.field.node.ps_collection.field_id
+    - field.field.node.ps_collection.field_key_image_id
+    - field.field.node.ps_collection.field_name
+    - field.field.node.ps_collection.field_parent_id
     - node.type.ps_collection
   module:
     - user
@@ -14,4 +20,10 @@ content:
   links:
     weight: 100
     region: content
-hidden: {  }
+hidden:
+  field_cas_required: true
+  field_description: true
+  field_id: true
+  field_key_image_id: true
+  field_name: true
+  field_parent_id: true
