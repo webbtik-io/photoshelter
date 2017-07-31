@@ -2,16 +2,16 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_parent_id_2
+    - field.storage.node.field_id
     - node.type.ps_collection
-id: node.ps_collection.field_parent_id_2
-field_name: field_parent_id_2
+id: node.ps_collection.field_id
+field_name: field_id
 entity_type: node
 bundle: ps_collection
-label: 'Parent ID'
+label: 'Collection ID'
 description: ''
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }

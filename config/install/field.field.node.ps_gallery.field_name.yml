@@ -2,13 +2,13 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_parent_id
-    - node.type.ps_photo
-id: node.ps_photo.field_parent_id
-field_name: field_parent_id
+    - field.storage.node.field_name
+    - node.type.ps_gallery
+id: node.ps_gallery.field_name
+field_name: field_name
 entity_type: node
-bundle: ps_photo
-label: 'Parent ID'
+bundle: ps_gallery
+label: 'Gallery Name'
 description: ''
 required: false
 translatable: true

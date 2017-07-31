@@ -1,11 +1,8 @@
-uuid: 99e60deb-2241-41f4-aba6-332018884247
 langcode: en
 status: true
 dependencies:
   module:
     - node
-_core:
-  default_config_hash: PBu_EHb0N2RVVVr4ydRgTI_hgOPyflbH05IURgOBXXM
 id: node.field_file_name
 field_name: field_file_name
 entity_type: node

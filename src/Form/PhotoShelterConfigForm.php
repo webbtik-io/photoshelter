@@ -414,12 +414,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'comment'             => 0,
       'created'             => \Drupal::time()->getRequestTime(),
       'field_cas_required'  => $cas_required,
-      'field_collection_id' => $collectionId,
-      'field_gallery_description'   => $cDescription,
+      'field_id' => $collectionId,
+      'field_description'   => $cDescription,
       'field_key_image_id'  => $cKeyImage,
       'field_key_image_file' => ['target_id' => $file->id()],
       'field_name'          => $collectionName,
-      'field_parent_id_2'     => $parentId,
+      'field_parent_id'     => $parentId,
     ]);
     try {
       $node->save();
@@ -537,12 +537,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'comment'                   => 0,
       'created'                   => \Drupal::time()->getRequestTime(),
       'field_cas_required'        => $cas_required,
-      'field_gallery_id'          => $galleryId,
-      'field_gallery_description' => $galleryDescription,
+      'field_id'          => $galleryId,
+      'field_description' => $galleryDescription,
       'field_key_image_id'        => $galleryImage,
       'field_key_image_file'      => $galleryImageFile,
-      'field_gallery_name'        => $galleryName,
-      'field_parent_id_2'           => $parentId,
+      'field_name'        => $galleryName,
+      'field_parent_id'           => $parentId,
     ]);
     try {
       $node->save();
@@ -617,11 +617,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         'comment'            => 0,
         'created'            => \Drupal::time()->getRequestTime(),
         'field_cas_required' => $parentCas,
-        'field_image_id'     => $imageId,
+        'field_id'     => $imageId,
         'field_file_name'    => $imageName,
         'field_parent_id'    => $parentId,
         'field_auth_link'    => $imageAuthLink,
-        'field_link_link'         => $imageLink,
+        'field_link'         => $imageLink,
       ]);
       try {
         $node->save();

@@ -2,10 +2,10 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_gallery_id
+    - field.storage.node.field_id
     - node.type.ps_gallery
-id: node.ps_gallery.field_gallery_id
-field_name: field_gallery_id
+id: node.ps_gallery.field_id
+field_name: field_id
 entity_type: node
 bundle: ps_gallery
 label: 'Gallery ID'

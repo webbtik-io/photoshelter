@@ -3,7 +3,6 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
-    - field.field.node.ps_gallery.field_cas_required
     - node.type.ps_gallery
   module:
     - user
@@ -15,5 +14,4 @@ content:
   links:
     weight: 100
     region: content
-hidden:
-  field_cas_required: true
+hidden: {  }
