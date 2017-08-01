@@ -6,3 +6,6 @@ type: module
 core: 8.x
 
 php: 7.1
+
+dependencies:
+  - remote_stream_wrapper
