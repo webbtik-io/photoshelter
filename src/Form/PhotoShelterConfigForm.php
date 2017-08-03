@@ -329,6 +329,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param bool $update
    * @param string|NULL $parentId
    */
+
   private function curlOneCollection(string $collectionId, DateTime &$time,
     bool $update, string $parentId = NULL) {
 
@@ -465,11 +466,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         unset($gallery);
         continue;
       }
-      else if (array_key_exists('Parents', $gallery)) {
-        unset($gallery);
-        continue;
-      }
-      else {
+      else if (!isset($galleryParent)) {
         $this->getGallery($gallery, $time, $update);
       }
       unset($gallery);
