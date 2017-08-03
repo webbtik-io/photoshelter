@@ -3,13 +3,15 @@ status: true
 dependencies:
   config:
     - field.field.node.ps_collection.field_cas_required
-    - field.field.node.ps_collection.field_collection_id
     - field.field.node.ps_collection.field_description
+    - field.field.node.ps_collection.field_id
+    - field.field.node.ps_collection.field_key_image_file
     - field.field.node.ps_collection.field_key_image_id
     - field.field.node.ps_collection.field_name
     - field.field.node.ps_collection.field_parent_id
     - node.type.ps_collection
   module:
+    - file
     - path
 id: node.ps_collection.default
 targetEntityType: node
@@ -23,30 +25,37 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_cas_required:
-    weight: 34
+    weight: 31
     settings:
       display_label: true
     third_party_settings: {  }
     type: boolean_checkbox
     region: content
-  field_collection_id:
-    weight: 31
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
   field_description:
     weight: 33
     settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_id:
+    weight: 38
+    settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
     region: content
+  field_key_image_file:
+    weight: 39
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
+    type: file_generic
+    region: content
   field_key_image_id:
-    weight: 35
+    weight: 34
     settings:
       size: 60
       placeholder: ''
@@ -54,7 +63,7 @@ content:
     type: string_textfield
     region: content
   field_name:
-    weight: 32
+    weight: 36
     settings:
       size: 60
       placeholder: ''
@@ -62,7 +71,7 @@ content:
     type: string_textfield
     region: content
   field_parent_id:
-    weight: 36
+    weight: 37
     settings:
       size: 60
       placeholder: ''

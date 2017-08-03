@@ -2,23 +2,23 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.ps_photo.field_auth_link
-    - field.field.node.ps_photo.field_cas_required
-    - field.field.node.ps_photo.field_file_name
-    - field.field.node.ps_photo.field_image_id
-    - field.field.node.ps_photo.field_link
-    - field.field.node.ps_photo.field_parent_id
-    - node.type.ps_photo
+    - field.field.node.ps_image.field_auth_link
+    - field.field.node.ps_image.field_cas_required
+    - field.field.node.ps_image.field_file_name
+    - field.field.node.ps_image.field_id
+    - field.field.node.ps_image.field_link
+    - field.field.node.ps_image.field_parent_id
+    - node.type.ps_image
   module:
     - link
     - user
-id: node.ps_photo.default
+id: node.ps_image.default
 targetEntityType: node
-bundle: ps_photo
+bundle: ps_image
 mode: default
 content:
   field_auth_link:
-    weight: 112
+    weight: 105
     label: above
     settings:
       trim_length: 80
@@ -30,7 +30,7 @@ content:
     type: link
     region: content
   field_cas_required:
-    weight: 111
+    weight: 101
     label: above
     settings:
       format: default
@@ -40,6 +40,14 @@ content:
     type: boolean
     region: content
   field_file_name:
+    weight: 103
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_id:
     weight: 102
     label: above
     settings:
@@ -47,24 +55,20 @@ content:
     third_party_settings: {  }
     type: string
     region: content
-  field_image_id:
-    weight: 101
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
   field_link:
-    weight: 114
+    weight: 106
     label: above
     settings:
-      link_to_entity: false
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
     third_party_settings: {  }
-    type: string
+    type: link
     region: content
   field_parent_id:
-    weight: 113
+    weight: 104
     label: above
     settings:
       link_to_entity: false

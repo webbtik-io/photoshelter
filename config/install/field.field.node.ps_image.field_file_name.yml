@@ -2,13 +2,13 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_link
-    - node.type.ps_photo
-id: node.ps_photo.field_link
-field_name: field_link
+    - field.storage.node.field_file_name
+    - node.type.ps_image
+id: node.ps_image.field_file_name
+field_name: field_file_name
 entity_type: node
-bundle: ps_photo
-label: Link
+bundle: ps_image
+label: 'File Name'
 description: ''
 required: false
 translatable: false

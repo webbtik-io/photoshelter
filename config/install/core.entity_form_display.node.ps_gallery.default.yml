@@ -3,13 +3,15 @@ status: true
 dependencies:
   config:
     - field.field.node.ps_gallery.field_cas_required
-    - field.field.node.ps_gallery.field_gallery_description
-    - field.field.node.ps_gallery.field_gallery_id
-    - field.field.node.ps_gallery.field_gallery_name
+    - field.field.node.ps_gallery.field_description
+    - field.field.node.ps_gallery.field_id
+    - field.field.node.ps_gallery.field_key_image_file
     - field.field.node.ps_gallery.field_key_image_id
+    - field.field.node.ps_gallery.field_name
     - field.field.node.ps_gallery.field_parent_id
     - node.type.ps_gallery
   module:
+    - file
     - path
 id: node.ps_gallery.default
 targetEntityType: node
@@ -22,7 +24,14 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_gallery_description:
+  field_cas_required:
+    weight: 31
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
+    region: content
+  field_description:
     weight: 33
     settings:
       rows: 5
@@ -30,15 +39,7 @@ content:
     third_party_settings: {  }
     type: string_textarea
     region: content
-  field_gallery_id:
-    weight: 31
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_gallery_name:
+  field_id:
     weight: 32
     settings:
       size: 60
@@ -46,8 +47,31 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
+  field_key_image_file:
+    weight: 38
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
+    type: file_generic
+    region: content
   field_key_image_id:
     weight: 34
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_name:
+    weight: 36
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_parent_id:
+    weight: 37
     settings:
       size: 60
       placeholder: ''
@@ -91,6 +115,4 @@ content:
       placeholder: ''
     region: content
     third_party_settings: {  }
-hidden:
-  field_cas_required: true
-  field_parent_id: true
+hidden: {  }

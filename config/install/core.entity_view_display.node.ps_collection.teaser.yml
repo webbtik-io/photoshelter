@@ -4,10 +4,11 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.ps_collection.field_cas_required
-    - field.field.node.ps_collection.field_collection_id
     - field.field.node.ps_collection.field_description
+    - field.field.node.ps_collection.field_id
     - field.field.node.ps_collection.field_key_image_id
     - field.field.node.ps_collection.field_name
+    - field.field.node.ps_collection.field_parent_id
     - node.type.ps_collection
   module:
     - user
@@ -21,7 +22,8 @@ content:
     region: content
 hidden:
   field_cas_required: true
-  field_collection_id: true
   field_description: true
+  field_id: true
   field_key_image_id: true
   field_name: true
+  field_parent_id: true

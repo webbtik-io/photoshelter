@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_key_image_file
+    - node.type.ps_collection
+  module:
+    - file
+id: node.ps_collection.field_key_image_file
+field_name: field_key_image_file
+entity_type: node
+bundle: ps_collection
+label: 'Key Image File'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: '[date:custom:Y]-[date:custom:m]'
+  file_extensions: 'jpg jpeg png gif tif tiff'
+  max_filesize: ''
+  description_field: false
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: file

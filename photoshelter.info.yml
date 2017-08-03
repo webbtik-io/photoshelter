@@ -1,8 +1,11 @@
 name: PhotoShelter API
 description: 'Consumes the PhotoShelter API'
-package: Custom
+package: BYU
 
 type: module
 core: 8.x
 
-php: 7.1
+php: 7.0
+
+dependencies:
+  - remote_stream_wrapper

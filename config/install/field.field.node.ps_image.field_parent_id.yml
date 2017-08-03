@@ -3,11 +3,11 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_parent_id
-    - node.type.ps_photo
-id: node.ps_photo.field_parent_id
+    - node.type.ps_image
+id: node.ps_image.field_parent_id
 field_name: field_parent_id
 entity_type: node
-bundle: ps_photo
+bundle: ps_image
 label: 'Parent ID'
 description: ''
 required: false

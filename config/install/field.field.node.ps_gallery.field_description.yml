@@ -2,17 +2,17 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_gallery_name
+    - field.storage.node.field_description
     - node.type.ps_gallery
-id: node.ps_gallery.field_gallery_name
-field_name: field_gallery_name
+id: node.ps_gallery.field_description
+field_name: field_description
 entity_type: node
 bundle: ps_gallery
-label: 'Gallery Name'
+label: Description
 description: ''
 required: false
-translatable: false
+translatable: true
 default_value: {  }
 default_value_callback: ''
 settings: {  }
-field_type: string
+field_type: string_long

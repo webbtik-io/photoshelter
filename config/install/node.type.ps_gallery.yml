@@ -10,7 +10,7 @@ third_party_settings:
     parent: 'main:'
 name: 'PS Gallery'
 type: ps_gallery
-description: 'Gallery from your PhotoShelter.'
+description: 'Galleries from your PhotoShelter.'
 help: ''
 new_revision: true
 preview_mode: 1

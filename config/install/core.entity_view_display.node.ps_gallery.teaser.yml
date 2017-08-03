@@ -4,10 +4,10 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.ps_gallery.field_cas_required
-    - field.field.node.ps_gallery.field_gallery_description
-    - field.field.node.ps_gallery.field_gallery_id
-    - field.field.node.ps_gallery.field_gallery_name
+    - field.field.node.ps_gallery.field_description
+    - field.field.node.ps_gallery.field_id
     - field.field.node.ps_gallery.field_key_image_id
+    - field.field.node.ps_gallery.field_name
     - field.field.node.ps_gallery.field_parent_id
     - node.type.ps_gallery
   module:
@@ -22,8 +22,8 @@ content:
     region: content
 hidden:
   field_cas_required: true
-  field_gallery_description: true
-  field_gallery_id: true
-  field_gallery_name: true
+  field_description: true
+  field_id: true
   field_key_image_id: true
+  field_name: true
   field_parent_id: true

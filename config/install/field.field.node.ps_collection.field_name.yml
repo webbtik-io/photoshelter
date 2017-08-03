@@ -8,7 +8,7 @@ id: node.ps_collection.field_name
 field_name: field_name
 entity_type: node
 bundle: ps_collection
-label: Name
+label: 'Collection Name'
 description: ''
 required: false
 translatable: false
