@@ -347,10 +347,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     $jsonResponse = json_decode($response, TRUE);
     $collection = $jsonResponse['data']['Collection'];
-    if ($collection['f_list'] === 'f') {
-      unset($collection);
-      return;
-    }
     $this->saveOneCollection($collection, $time, $update, $collection['Visibility']['mode'], $parentId);
     unset($collection);
   }
@@ -422,7 +418,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     unset($node);
 
     // Create nodes for children
-    if (!isset($parentId) && isset($cChildren)) {
+    if (isset($cChildren)) {
       foreach ($cChildren as $child) {
         switch(key($cChildren)) {
           case 'Gallery':

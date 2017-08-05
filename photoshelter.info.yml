@@ -7,5 +7,7 @@ core: 8.x
 
 php: 7.0
 
+vesrion: 1.0-alpha2
+
 dependencies:
   - remote_stream_wrapper
