@@ -386,8 +386,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
     unset($collectionTime);
 
-    $file = File::create(['uri' => $cKeyImageFile]);
-    $file->save();
+    if ($cKeyImageFile !== NULL) {
+      $file = File::create(['uri' => $cKeyImageFile]);
+      $file->save();
+    }
 
     // Create node from $collection and $keyImageId
     $node = Node::create([
@@ -404,7 +406,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'field_id' => $collectionId,
       'field_description'   => $cDescription,
       'field_key_image_id'  => $cKeyImage,
-      'field_key_image_file' => ['target_id' => $file->id()],
+      'field_key_image_file' => isset($file) ? ['target_id' => $file->id()] : NULL,
       'field_name'          => $collectionName,
       'field_parent_id'     => $parentId,
     ]);
@@ -414,7 +416,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       echo $e->getMessage();
       exit(1);
     }
-    unset($file);
+    if (isset($file)) {
+      unset($file);
+    }
     unset($node);
 
     // Create nodes for children
@@ -500,8 +504,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       }
     }
 
-    $file = File::create(['uri' => $galleryImageFile]);
-    $file->save();
+    if (isset($galleryImageFile)) {
+      $file = File::create(['uri' => $galleryImageFile]);
+      $file->save();
+    }
 
     // Create node
     $node = Node::create([
@@ -518,7 +524,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'field_id'          => $galleryId,
       'field_description' => $galleryDescription,
       'field_key_image_id'        => $galleryImage,
-      'field_key_image_file'      => ['target_id' => $file->id()],
+      'field_key_image_file'      => isset($file) ? ['target_id' => $file->id()] : NULL,
       'field_name'        => $galleryName,
       'field_parent_id'           => $parentId,
     ]);
@@ -528,7 +534,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       echo $e->getMessage();
       exit(1);
     }
-    unset($file);
+    if (isset($file)) {
+      unset($file);
+    }
     unset($node);
 
     $this->getPhotos($galleryId, $cas_required, $time, $update);
