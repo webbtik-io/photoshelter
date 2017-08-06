@@ -48,10 +48,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   protected $connection;
   protected $user;
   private $cookie;
-  // private $flistCollections;
   private $api_key;
   private $options;
-  // private $memoryUsage;
   private $uid;
 
   /**
@@ -110,12 +108,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $config            = $this->config('photoshelter.settings');
     $form['email']     = [
       '#type'          => 'email',
-      '#title'         => $this->t('The email associated with your PhotoShelter account.'),
+      '#title'         =>
+        $this->t('The email associated with your PhotoShelter account.'),
       '#default_value' => $config->get('email'),
     ];
     $form['password']  = [
       '#type'          => 'password',
-      '#title'         => $this->t('Your PhotoShelter account password.'),
+      '#title'         =>
+        $this->t('Your PhotoShelter account password.'),
       '#default_value' => $config->get('password'),
     ];
     $form['api_key']   = [
@@ -258,7 +258,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       curl_close($ch);
       $jsonResponse = json_decode($response, TRUE);
       if ($jsonResponse['status'] != 'ok') {
-        $form_state->setError($form, 'Invalid login credentials or API key.');
+        $form_state->setError($form,
+          'Invalid login credentials or API key.');
       }
     }
   }
@@ -320,7 +321,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    */
   private function getOneCollection(array &$collection, DateTime &$time,
     bool $update, string $parentId = NULL) {
-    $this->saveOneCollection($collection, $time, $update, $collection['Permission']['mode'], $parentId);
+    $this->saveOneCollection($collection, $time, $update,
+      $collection['Permission']['mode'], $parentId);
   }
 
   /**
@@ -347,7 +349,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     $jsonResponse = json_decode($response, TRUE);
     $collection = $jsonResponse['data']['Collection'];
-    $this->saveOneCollection($collection, $time, $update, $collection['Visibility']['mode'], $parentId);
+    $this->saveOneCollection($collection, $time, $update,
+      $collection['Visibility']['mode'], $parentId);
     unset($collection);
   }
 
@@ -375,9 +378,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $cas_required = $this->getPermission($cPermission);
 
     // Check if modified time is after time
-    $collectionTime = DateTime::createFromFormat(
-      'YY"-"MM"-"DD" "HH":"II":"SS" "tz', $cModified,
-      new DateTimeZone('GMT'));
+    $collectionTime = DateTime::createFromFormat('Y-m-d H:i:s e',
+      $cModified, new DateTimeZone('GMT'));
     if ($update) {
       if ($collectionTime < $time) {
         unset($collectionTime);
@@ -406,7 +408,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'field_id' => $collectionId,
       'field_description'   => $cDescription,
       'field_key_image_id'  => $cKeyImage,
-      'field_key_image_file' => isset($file) ? ['target_id' => $file->id()] : NULL,
+      'field_key_image_file' => isset($file) ?
+        ['target_id' => $file->id()] : NULL,
       'field_name'          => $collectionName,
       'field_parent_id'     => $parentId,
     ]);
@@ -496,7 +499,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // Check if modified time is after time
     $galleryTime = DateTime::createFromFormat(
-      'YY"-"MM"-"DD" "HH":"II":"SS" "tz', $galleryModified,
+      'Y-m-d H:i:s e', $galleryModified,
       new DateTimeZone('GMT'));
     if ($update) {
       if ($galleryTime < $time) {
@@ -524,7 +527,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'field_id'          => $galleryId,
       'field_description' => $galleryDescription,
       'field_key_image_id'        => $galleryImage,
-      'field_key_image_file'      => isset($file) ? ['target_id' => $file->id()] : NULL,
+      'field_key_image_file'      => isset($file) ?
+        ['target_id' => $file->id()] : NULL,
       'field_name'        => $galleryName,
       'field_parent_id'           => $parentId,
     ]);
@@ -587,9 +591,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         unset($image);
 
         // Check if modified time is after time
-        $imageTime = DateTime::createFromFormat(
-          'YY"-"MM"-"DD" "HH":"II":"SS" "tz', $imageUpdate,
-          new DateTimeZone('GMT'));
+        $imageTime = DateTime::createFromFormat('Y-m-d H:i:s e',
+          $imageUpdate, new DateTimeZone('GMT'));
         if ($update) {
           if ($imageTime < $time) {
             continue;
