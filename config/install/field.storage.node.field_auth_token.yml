@@ -4,11 +4,12 @@ dependencies:
   module:
     - node
     - text
-id: node.field_description
-field_name: field_description
+id: node.field_auth_token
+field_name: field_auth_token
 entity_type: node
-type: text_long
-settings: {  }
+type: text
+settings:
+  max_length: 255
 module: text
 locked: false
 cardinality: 1

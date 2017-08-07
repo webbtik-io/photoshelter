@@ -3,34 +3,26 @@ status: true
 dependencies:
   config:
     - field.field.node.ps_image.field_auth_link
+    - field.field.node.ps_image.field_auth_token
     - field.field.node.ps_image.field_cas_required
-    - field.field.node.ps_image.field_file_name
     - field.field.node.ps_image.field_id
-    - field.field.node.ps_image.field_link
-    - field.field.node.ps_image.field_parent_id
     - field.field.node.ps_image.field_key_image_file
-    - image.style.thumbnail
+    - field.field.node.ps_image.field_link
+    - field.field.node.ps_image.field_name
+    - field.field.node.ps_image.field_parent_id
     - node.type.ps_image
   module:
-    - link
     - image
+    - link
+    - text
     - user
 id: node.ps_image.default
 targetEntityType: node
 bundle: ps_image
 mode: default
 content:
-  field_key_image_file:
-    weight: 110
-    label: above
-    settings:
-      image_style: ''
-      image_link: ''
-    third_party_settings: {  }
-    type: image
-    region: content
   field_auth_link:
-    weight: 105
+    weight: 101
     label: above
     settings:
       trim_length: 80
@@ -41,8 +33,15 @@ content:
     third_party_settings: {  }
     type: link
     region: content
+  field_auth_token:
+    weight: 108
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
   field_cas_required:
-    weight: 101
+    weight: 102
     label: above
     settings:
       format: default
@@ -51,24 +50,15 @@ content:
     third_party_settings: {  }
     type: boolean
     region: content
-  field_file_name:
-    weight: 103
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
   field_id:
-    weight: 102
+    weight: 104
     label: above
-    settings:
-      link_to_entity: false
+    settings: {  }
     third_party_settings: {  }
-    type: string
+    type: text_default
     region: content
   field_key_image_file:
-    weight: 109
+    weight: 105
     label: above
     settings:
       image_style: ''
@@ -88,13 +78,19 @@ content:
     third_party_settings: {  }
     type: link
     region: content
-  field_parent_id:
-    weight: 104
+  field_name:
+    weight: 103
     label: above
-    settings:
-      link_to_entity: false
+    settings: {  }
     third_party_settings: {  }
-    type: string
+    type: text_default
+    region: content
+  field_parent_id:
+    weight: 107
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
     region: content
   links:
     weight: 100

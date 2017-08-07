@@ -10,7 +10,7 @@ third_party_settings:
     parent: 'main:'
 name: 'PS Image'
 type: ps_image
-description: 'Images from your PhotoShelter.'
+description: 'Images from your PhotoShelter library.'
 help: ''
 new_revision: true
 preview_mode: 1

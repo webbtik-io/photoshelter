@@ -3,18 +3,20 @@ status: true
 dependencies:
   config:
     - field.field.node.ps_image.field_auth_link
+    - field.field.node.ps_image.field_auth_token
     - field.field.node.ps_image.field_cas_required
-    - field.field.node.ps_image.field_file_name
     - field.field.node.ps_image.field_id
-    - field.field.node.ps_image.field_link
-    - field.field.node.ps_image.field_parent_id
     - field.field.node.ps_image.field_key_image_file
+    - field.field.node.ps_image.field_link
+    - field.field.node.ps_image.field_name
+    - field.field.node.ps_image.field_parent_id
     - image.style.thumbnail
     - node.type.ps_image
   module:
-    - link
     - image
+    - link
     - path
+    - text
 id: node.ps_image.default
 targetEntityType: node
 bundle: ps_image
@@ -27,35 +29,43 @@ content:
     settings: {  }
     third_party_settings: {  }
   field_auth_link:
-    weight: 35
+    weight: 31
     settings:
       placeholder_url: ''
       placeholder_title: ''
     third_party_settings: {  }
     type: link_default
     region: content
+  field_auth_token:
+    weight: 38
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textfield
+    region: content
   field_cas_required:
-    weight: 31
+    weight: 32
     settings:
       display_label: true
     third_party_settings: {  }
     type: boolean_checkbox
     region: content
-  field_file_name:
-    weight: 33
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
   field_id:
-    weight: 32
+    weight: 34
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
+    type: text_textfield
+    region: content
+  field_key_image_file:
+    weight: 35
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
     region: content
   field_link:
     weight: 36
@@ -65,13 +75,21 @@ content:
     third_party_settings: {  }
     type: link_default
     region: content
-  field_parent_id:
-    weight: 34
+  field_name:
+    weight: 33
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
+    type: text_textfield
+    region: content
+  field_parent_id:
+    weight: 37
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textfield
     region: content
   path:
     type: path

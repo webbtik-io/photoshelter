@@ -4,6 +4,8 @@ dependencies:
   config:
     - field.storage.node.field_id
     - node.type.ps_collection
+  module:
+    - text
 id: node.ps_collection.field_id
 field_name: field_id
 entity_type: node
@@ -11,8 +13,8 @@ bundle: ps_collection
 label: 'Collection ID'
 description: ''
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }
-field_type: string
+field_type: text

@@ -588,6 +588,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         $imageName = $image['Image']['file_name'];
         $imageAuthLink = $image['ImageLink']['auth_link'];
         $imageLink = $image['ImageLink']['link'];
+        $imageToken = $image['ImageLink']['token'];
         unset($image);
 
         // Check if modified time is after time
@@ -617,12 +618,13 @@ class PhotoShelterConfigForm extends ConfigFormBase {
           'created'            => \Drupal::time()->getRequestTime(),
           'field_cas_required' => $parentCas,
           'field_id'     => $imageId,
-          'field_file_name'    => $imageName,
+          'field_name'    => $imageName,
           'field_parent_id'    => $parentId,
           'field_auth_link'    => $imageAuthLink,
           'field_link'         => $imageLink,
           'field_key_image_file' => isset($file) ?
             ['target_id' => $file->id()] : NULL,
+          'field_auth_token' => $imageToken,
         ]);
         try {
           $node->save();

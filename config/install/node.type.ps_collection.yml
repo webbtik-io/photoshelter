@@ -10,7 +10,7 @@ third_party_settings:
     parent: 'main:'
 name: 'PS Collection'
 type: ps_collection
-description: 'Collections from your PhotoShelter.'
+description: 'Collections from your PhotoShelter library.'
 help: ''
 new_revision: true
 preview_mode: 1
