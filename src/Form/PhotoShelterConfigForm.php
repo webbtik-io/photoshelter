@@ -372,7 +372,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $cDescription = $collection['description'];
     $cKeyImage = $collection['KeyImage']['image_id'];
     $cChildren = $collection['Children'];
-    $cKeyImageFile = $collection['KeyImage']['ImageLink']['auth_link'];
+    $cKeyImageFile = $collection['KeyImage']['ImageLink']['link'];
     unset($collection);
 
     $cas_required = $this->getPermission($cPermission);
@@ -492,7 +492,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $galleryName = $gallery['name'];
     $galleryDescription = $gallery['description'];
     $galleryImage = $gallery['KeyImage']['image_id'];
-    $galleryImageFile = $gallery['KeyImage']['ImageLink']['auth_link'];
+    $galleryImageFile = $gallery['KeyImage']['ImageLink']['link'];
     unset($gallery);
 
     $cas_required = $this->getPermission($galleryPermission);
