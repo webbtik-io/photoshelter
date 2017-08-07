@@ -2,10 +2,10 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_parent_id_2
+    - field.storage.node.field_parent_id
     - node.type.ps_gallery
-id: node.ps_gallery.field_parent_id_2
-field_name: field_parent_id_2
+id: node.ps_gallery.field_parent_id
+field_name: field_parent_id
 entity_type: node
 bundle: ps_gallery
 label: 'Parent ID'

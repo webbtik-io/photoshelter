@@ -9,9 +9,11 @@ dependencies:
     - field.field.node.ps_gallery.field_key_image_id
     - field.field.node.ps_gallery.field_name
     - field.field.node.ps_gallery.field_parent_id
+    - image.style.thumbnail
     - node.type.ps_gallery
   module:
     - file
+    - image
     - user
 id: node.ps_gallery.default
 targetEntityType: node
@@ -46,9 +48,11 @@ content:
   field_key_image_file:
     weight: 108
     label: above
-    settings: {  }
+    settings:
+      image_style: ''
+      image_link: ''
     third_party_settings: {  }
-    type: file_default
+    type: image
     region: content
   field_key_image_id:
     weight: 104
