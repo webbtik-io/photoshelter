@@ -12,9 +12,9 @@ dependencies:
     - image.style.thumbnail
     - node.type.ps_collection
   module:
-    - file
     - image
     - path
+    - text
 id: node.ps_collection.default
 targetEntityType: node
 bundle: ps_collection
@@ -34,28 +34,36 @@ content:
     type: boolean_checkbox
     region: content
   field_description:
-    weight: 33
+    weight: 32
     settings:
       rows: 5
       placeholder: ''
     third_party_settings: {  }
-    type: string_textarea
+    type: text_textarea
     region: content
   field_id:
-    weight: 38
+    weight: 33
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
+    type: text_textfield
     region: content
-  field_key_image_id:
+  field_key_image_file:
     weight: 34
     settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
+    region: content
+  field_key_image_id:
+    weight: 35
+    settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
+    type: text_textfield
     region: content
   field_name:
     weight: 36
@@ -63,7 +71,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
+    type: text_textfield
     region: content
   field_parent_id:
     weight: 37
@@ -71,15 +79,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_key_image_file:
-    weight: 39
-    settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
-    third_party_settings: {  }
-    type: image_image
+    type: text_textfield
     region: content
   path:
     type: path

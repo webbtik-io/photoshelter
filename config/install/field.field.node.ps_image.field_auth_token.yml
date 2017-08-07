@@ -2,18 +2,18 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_id
-    - node.type.ps_gallery
+    - field.storage.node.field_auth_token
+    - node.type.ps_image
   module:
     - text
-id: node.ps_gallery.field_id
-field_name: field_id
+id: node.ps_image.field_auth_token
+field_name: field_auth_token
 entity_type: node
-bundle: ps_gallery
-label: 'Gallery ID'
+bundle: ps_image
+label: 'Auth Token'
 description: ''
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }
