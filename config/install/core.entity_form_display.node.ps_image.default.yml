@@ -8,9 +8,12 @@ dependencies:
     - field.field.node.ps_image.field_id
     - field.field.node.ps_image.field_link
     - field.field.node.ps_image.field_parent_id
+    - field.field.node.ps_image.field_key_image_file
+    - image.style.thumbnail
     - node.type.ps_image
   module:
     - link
+    - image
     - path
 id: node.ps_image.default
 targetEntityType: node

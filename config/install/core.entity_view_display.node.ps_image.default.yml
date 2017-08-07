@@ -8,15 +8,27 @@ dependencies:
     - field.field.node.ps_image.field_id
     - field.field.node.ps_image.field_link
     - field.field.node.ps_image.field_parent_id
+    - field.field.node.ps_image.field_key_image_file
+    - image.style.thumbnail
     - node.type.ps_image
   module:
     - link
+    - image
     - user
 id: node.ps_image.default
 targetEntityType: node
 bundle: ps_image
 mode: default
 content:
+  field_key_image_file:
+    weight: 110
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
   field_auth_link:
     weight: 105
     label: above
@@ -54,6 +66,15 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
+    region: content
+  field_key_image_file:
+    weight: 109
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
     region: content
   field_link:
     weight: 106

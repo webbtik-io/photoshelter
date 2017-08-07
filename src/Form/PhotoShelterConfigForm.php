@@ -557,7 +557,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $page = 1;
     do {
       // Get list of images in gallery
-      $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery/$parentId/images?fields=image_id,f_visible&api_key=$this->api_key&per_page=1500&page=$page&extend={%22Image%22:{%22fields%22:%22image_id,file_name,updated_at%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}}}");
+      $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery/$parentId/images?fields=image_id,f_visible&api_key=$this->api_key&per_page=750&page=$page&extend={%22Image%22:{%22fields%22:%22image_id,file_name,updated_at%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}}}");
       curl_setopt_array($curl, $this->options);
       $response = curl_exec($curl);
       $err = curl_error($curl);
@@ -599,6 +599,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
           }
         }
 
+        if (isset($imageLink)) {
+          $file = File::create(['uri' => $imageLink]);
+          $file->save();
+        }
+
         // Create node from $image and $keyImageId
         $node = Node::create([
           'nid'                => NULL,
@@ -616,12 +621,17 @@ class PhotoShelterConfigForm extends ConfigFormBase {
           'field_parent_id'    => $parentId,
           'field_auth_link'    => $imageAuthLink,
           'field_link'         => $imageLink,
+          'field_key_image_file' => isset($file) ?
+            ['target_id' => $file->id()] : NULL,
         ]);
         try {
           $node->save();
         } catch (Exception $e) {
           echo $e->getMessage();
           exit(1);
+        }
+        if (isset($file)) {
+          unset($file);
         }
         unset($node);
       }
