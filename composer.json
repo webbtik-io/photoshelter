@@ -10,8 +10,8 @@
     }
   ],
   "support": {
-    "issues": "https://github.com/byuweb/photoshelter/issues",
-    "source": "https://github.com/byuweb/photoshelter.git"
+    "issues": "https://drupal.org/project/photoshelter/issues",
+    "source": "https://drupalcode.org/project/photoshelter.git"
   },
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
