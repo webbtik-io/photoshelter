@@ -2,10 +2,10 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_gallery_description
+    - field.storage.node.field_description
     - node.type.ps_collection
-id: node.ps_collection.field_gallery_description
-field_name: field_gallery_description
+id: node.ps_collection.field_description
+field_name: field_description
 entity_type: node
 bundle: ps_collection
 label: 'Collection Description'

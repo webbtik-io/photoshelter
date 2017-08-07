@@ -9,9 +9,11 @@ dependencies:
     - field.field.node.ps_gallery.field_key_image_id
     - field.field.node.ps_gallery.field_name
     - field.field.node.ps_gallery.field_parent_id
+    - image.style.thumbnail
     - node.type.ps_gallery
   module:
     - file
+    - image
     - path
 id: node.ps_gallery.default
 targetEntityType: node
@@ -51,8 +53,9 @@ content:
     weight: 38
     settings:
       progress_indicator: throbber
+      preview_image_style: thumbnail
     third_party_settings: {  }
-    type: file_generic
+    type: image_image
     region: content
   field_key_image_id:
     weight: 34

@@ -9,9 +9,11 @@ dependencies:
     - field.field.node.ps_collection.field_key_image_id
     - field.field.node.ps_collection.field_name
     - field.field.node.ps_collection.field_parent_id
+    - image.style.thumbnail
     - node.type.ps_collection
   module:
     - file
+    - image
     - path
 id: node.ps_collection.default
 targetEntityType: node
@@ -47,13 +49,6 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_key_image_file:
-    weight: 39
-    settings:
-      progress_indicator: throbber
-    third_party_settings: {  }
-    type: file_generic
-    region: content
   field_key_image_id:
     weight: 34
     settings:
@@ -77,6 +72,14 @@ content:
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
+    region: content
+  field_key_image_file:
+    weight: 39
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
     region: content
   path:
     type: path

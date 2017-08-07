@@ -12,6 +12,7 @@ dependencies:
     - node.type.ps_collection
   module:
     - file
+    - image
     - user
 id: node.ps_collection.default
 targetEntityType: node
@@ -43,13 +44,6 @@ content:
     third_party_settings: {  }
     type: string
     region: content
-  field_key_image_file:
-    weight: 109
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: file_default
-    region: content
   field_key_image_id:
     weight: 104
     label: above
@@ -73,6 +67,15 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
+    region: content
+  field_key_image_file:
+    weight: 109
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
     region: content
   links:
     weight: 100
