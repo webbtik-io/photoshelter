@@ -4,12 +4,11 @@ dependencies:
   module:
     - node
     - core
-id: node.field_parent_id
-field_name: field_parent_id
+id: node.field_caption
+field_name: field_caption
 entity_type: node
-type: string
-settings:
-  max_length: 255
+type: string_long
+settings: {  }
 module: core
 locked: false
 cardinality: 1

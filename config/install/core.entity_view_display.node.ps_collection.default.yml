@@ -12,7 +12,7 @@ dependencies:
     - node.type.ps_collection
   module:
     - image
-    - text
+    - core
     - user
 id: node.ps_collection.default
 targetEntityType: node
@@ -34,14 +34,14 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_id:
     weight: 103
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_key_image_file:
     weight: 104
@@ -57,21 +57,21 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_name:
     weight: 106
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_parent_id:
     weight: 107
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   links:
     weight: 100

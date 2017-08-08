@@ -2,15 +2,15 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_name
-    - node.type.ps_collection
+    - field.storage.node.field_credit
+    - node.type.ps_image
   module:
     - core
-id: node.ps_collection.field_name
-field_name: field_name
+id: node.ps_image.field_credit
+field_name: field_credit
 entity_type: node
-bundle: ps_collection
-label: Name
+bundle: ps_image
+label: Credit
 description: ''
 required: false
 translatable: false

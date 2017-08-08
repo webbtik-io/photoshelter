@@ -5,7 +5,7 @@ dependencies:
     - field.storage.node.field_id
     - node.type.ps_collection
   module:
-    - text
+    - core
 id: node.ps_collection.field_id
 field_name: field_id
 entity_type: node
@@ -17,4 +17,4 @@ translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }
-field_type: text
+field_type: string

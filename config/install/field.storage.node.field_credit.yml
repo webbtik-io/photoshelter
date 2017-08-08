@@ -4,8 +4,8 @@ dependencies:
   module:
     - node
     - core
-id: node.field_parent_id
-field_name: field_parent_id
+id: node.field_credit
+field_name: field_credit
 entity_type: node
 type: string
 settings:
