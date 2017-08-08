@@ -14,7 +14,7 @@ dependencies:
   module:
     - image
     - path
-    - text
+    - core
 id: node.ps_gallery.default
 targetEntityType: node
 bundle: ps_gallery
@@ -39,7 +39,7 @@ content:
       rows: 5
       placeholder: ''
     third_party_settings: {  }
-    type: text_textarea
+    type: string_textarea
     region: content
   field_id:
     weight: 33
@@ -47,7 +47,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   field_key_image_file:
     weight: 34
@@ -63,7 +63,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   field_name:
     weight: 36
@@ -71,7 +71,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   field_parent_id:
     weight: 37
@@ -79,7 +79,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   path:
     type: path

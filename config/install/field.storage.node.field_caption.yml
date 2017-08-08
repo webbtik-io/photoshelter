@@ -3,13 +3,13 @@ status: true
 dependencies:
   module:
     - node
-    - text
+    - core
 id: node.field_caption
 field_name: field_caption
 entity_type: node
-type: text_long
+type: string_long
 settings: {  }
-module: text
+module: core
 locked: false
 cardinality: 1
 translatable: true

@@ -19,9 +19,7 @@ dependencies:
     - image
     - link
     - path
-    - text
-_core:
-  default_config_hash: yBKoYcBvxOpjbiskz3JqmORl8NiqruvXYoN6IDmhKKk
+    - core
 id: node.ps_image.default
 targetEntityType: node
 bundle: ps_image
@@ -47,7 +45,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   field_caption:
     weight: 41
@@ -55,7 +53,7 @@ content:
       rows: 5
       placeholder: ''
     third_party_settings: {  }
-    type: text_textarea
+    type: string_textarea
     region: content
   field_cas_required:
     weight: 32
@@ -70,7 +68,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   field_id:
     weight: 34
@@ -78,7 +76,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   field_key_image_file:
     weight: 35
@@ -111,7 +109,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   field_parent_id:
     weight: 37
@@ -119,7 +117,7 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: text_textfield
+    type: string_textfield
     region: content
   path:
     type: path

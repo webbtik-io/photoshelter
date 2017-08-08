@@ -5,7 +5,7 @@ dependencies:
     - field.storage.node.field_credit
     - node.type.ps_image
   module:
-    - text
+    - core
 id: node.ps_image.field_credit
 field_name: field_credit
 entity_type: node
@@ -17,4 +17,4 @@ translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }
-field_type: text_long
+field_type: string

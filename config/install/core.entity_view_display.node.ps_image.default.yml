@@ -17,10 +17,8 @@ dependencies:
   module:
     - image
     - link
-    - text
+    - core
     - user
-_core:
-  default_config_hash: DnQoRPB0iC-2RaPacNDspEFzFEsHZwBKTatSHCK_D-Y
 id: node.ps_image.default
 targetEntityType: node
 bundle: ps_image
@@ -43,14 +41,14 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_caption:
     weight: 111
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_cas_required:
     weight: 102
@@ -67,14 +65,14 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_id:
     weight: 104
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_key_image_file:
     weight: 105
@@ -110,14 +108,14 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   field_parent_id:
     weight: 107
     label: above
     settings: {  }
     third_party_settings: {  }
-    type: text_default
+    type: string
     region: content
   links:
     weight: 100
