@@ -32,6 +32,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\Entity\Node;
 use Drupal\file\Entity\File;
+use Drupal\taxonomy\Entity\Term;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -46,10 +47,15 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @var \Drupal\Core\Database\Connection
    */
   protected $connection;
+
   protected $user;
+
   private $cookie;
+
   private $api_key;
+
   private $options;
+
   private $uid;
 
   /**
@@ -58,26 +64,28 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    * @param \Drupal\Core\Database\Connection $connection
    */
-  public function __construct(ConfigFactoryInterface $config_factory,
-    Connection $connection) {
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    Connection $connection
+  ) {
     parent::__construct($config_factory);
-    $this->cookie = dirname(__FILE__) . '/cookie.txt';
-    $this->options = [
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => "",
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-      CURLOPT_CUSTOMREQUEST => "GET",
-      CURLOPT_COOKIEFILE     => $this->cookie,
-      CURLOPT_COOKIEJAR      => $this->cookie,
-      CURLOPT_SSL_VERIFYSTATUS => false,
-      CURLOPT_SSL_VERIFYPEER => false,
+    $this->cookie     = dirname(__FILE__) . '/cookie.txt';
+    $this->options    = [
+      CURLOPT_RETURNTRANSFER   => TRUE,
+      CURLOPT_ENCODING         => "",
+      CURLOPT_MAXREDIRS        => 10,
+      CURLOPT_HTTP_VERSION     => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST    => "GET",
+      CURLOPT_COOKIEFILE       => $this->cookie,
+      CURLOPT_COOKIEJAR        => $this->cookie,
+      CURLOPT_SSL_VERIFYSTATUS => FALSE,
+      CURLOPT_SSL_VERIFYPEER   => FALSE,
       CURLOPT_FOLLOWLOCATION
     ];
-    $config = $this->config('photoshelter.settings');
+    $config           = $this->config('photoshelter.settings');
     $this->connection = $connection;
-    $this->api_key = urlencode($config->get('api_key'));
-    $this->uid = $this->currentUser()->id();
+    $this->api_key    = urlencode($config->get('api_key'));
+    $this->uid        = $this->currentUser()->id();
   }
 
   /**
@@ -124,12 +132,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#default_value' => $config->get('api_key'),
     ];
     $form['sync_new']  = [
-      '#type'   => 'submit',
-      '#value'  => t('Sync New Additions'),
+      '#type'  => 'submit',
+      '#value' => t('Sync New Additions'),
     ];
     $form['sync_full'] = [
-      '#type'   => 'submit',
-      '#value'  => 'Sync All Data',
+      '#type'  => 'submit',
+      '#value' => 'Sync All Data',
     ];
     return $form;
   }
@@ -180,8 +188,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  private function sync_full_submit(array &$form,
-    FormStateInterface $form_state) {
+  private function sync_full_submit(
+    array &$form,
+    FormStateInterface $form_state
+  ) {
     $config = $this->config('photoshelter.settings');
 
     $time = new DateTime(19700101);
@@ -199,10 +209,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  private function sync_new_submit(array &$form,
-    FormStateInterface $form_state, bool $update = FALSE) {
+  private function sync_new_submit(
+    array &$form,
+    FormStateInterface $form_state, bool $update = FALSE
+  ) {
     $config = $this->config('photoshelter.settings');
-    $time = $config->get('last_sync');
+    $time   = $config->get('last_sync');
 
     // Get the date
     if ($time === 'Never') {
@@ -230,8 +242,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param array $form
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  private function authenticate(array &$form,
-    FormStateInterface &$form_state) {
+  private function authenticate(
+    array &$form,
+    FormStateInterface &$form_state
+  ) {
     $config   = $this->config('photoshelter.settings');
     $email    = $config->get('email');
     $password = $config->get('password');
@@ -244,7 +258,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
                 '&password=' . $password;
 
     // cURL to /psapi/v3/mem/authenticate to see if credentials are valid.
-    $ch      = curl_init($fullUrl);
+    $ch = curl_init($fullUrl);
     curl_setopt_array($ch, $this->options);
     $response = curl_exec($ch);
 
@@ -270,8 +284,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    * @param \DateTime $time
    */
-  private function getData(array &$form, FormStateInterface &$form_state,
-    DateTime &$time, bool $update = false) {
+  private function getData(
+    array &$form, FormStateInterface &$form_state,
+    DateTime &$time, bool $update = FALSE
+  ) {
     set_time_limit(0);
     $this->authenticate($form, $form_state);
     $this->getCollections($time, $update);
@@ -285,11 +301,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   private function getCollections(DateTime &$time, bool $update) {
     // Get collection and gallery data
     $api_key = $this->config('photoshelter.settings')->get('api_key');
-    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection?fields=collection_id,name,description,f_list,modified_at&api_key=$api_key&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
+    $curl    = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection?fields=collection_id,name,description,f_list,modified_at&api_key=$api_key&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
     curl_setopt_array($curl, $this->options);
 
     $response = curl_exec($curl);
-    $err = curl_error($curl);
+    $err      = curl_error($curl);
 
     curl_close($curl);
 
@@ -297,7 +313,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       echo "cURL Error #:" . $err;
       exit(1);
     }
-    $response = json_decode($response, TRUE);
+    $response    = json_decode($response, TRUE);
     $collections = $response['data']['Collection'];
     unset($response);
 
@@ -319,8 +335,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param bool $update
    * @param string $parentId
    */
-  private function getOneCollection(array &$collection, DateTime &$time,
-    bool $update, string $parentId = NULL) {
+  private function getOneCollection(
+    array &$collection, DateTime &$time,
+    bool $update, string $parentId = NULL
+  ) {
     $this->saveOneCollection($collection, $time, $update,
       $collection['Permission']['mode'], $parentId);
   }
@@ -332,14 +350,16 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param string|NULL $parentId
    */
 
-  private function curlOneCollection(string $collectionId, DateTime &$time,
-    bool $update, string $parentId = NULL) {
+  private function curlOneCollection(
+    string $collectionId, DateTime &$time,
+    bool $update, string $parentId = NULL
+  ) {
 
     $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection/$collectionId?api_key=6CmmdvcipQw&fields=collection_id,name,description,f_list,mode,modified_at&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
     curl_setopt_array($curl, $this->options);
 
     $response = curl_exec($curl);
-    $err = curl_error($curl);
+    $err      = curl_error($curl);
 
     curl_close($curl);
 
@@ -348,7 +368,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
 
     $jsonResponse = json_decode($response, TRUE);
-    $collection = $jsonResponse['data']['Collection'];
+    $collection   = $jsonResponse['data']['Collection'];
     $this->saveOneCollection($collection, $time, $update,
       $collection['Visibility']['mode'], $parentId);
     unset($collection);
@@ -363,16 +383,18 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param string|NULL $parentId
    */
 
-  private function saveOneCollection(array &$collection, DateTime &$time,
-    bool $update, string $cPermission, string $parentId = NULL) {
+  private function saveOneCollection(
+    array &$collection, DateTime &$time,
+    bool $update, string $cPermission, string $parentId = NULL
+  ) {
     // Check if it is meant to be public and set permissions
-    $collectionId = $collection['collection_id'];
+    $collectionId   = $collection['collection_id'];
     $collectionName = $collection['name'];
-    $cModified = $collection['modified_at'];
-    $cDescription = $collection['description'];
-    $cKeyImage = $collection['KeyImage']['image_id'];
-    $cChildren = $collection['Children'];
-    $cKeyImageFile = $collection['KeyImage']['ImageLink']['link'];
+    $cModified      = $collection['modified_at'];
+    $cDescription   = $collection['description'];
+    $cKeyImage      = $collection['KeyImage']['image_id'];
+    $cChildren      = $collection['Children'];
+    $cKeyImageFile  = $collection['KeyImage']['ImageLink']['link'];
     unset($collection);
 
     $cas_required = $this->getPermission($cPermission);
@@ -395,23 +417,23 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // Create node from $collection and $keyImageId
     $node = Node::create([
-      'nid'                 => NULL,
-      'langcode'            => 'en',
-      'uid'                 => $this->uid,
-      'type'                => 'ps_collection',
-      'title'               => $collectionName,
-      'status'              => 1,
-      'promote'             => 0,
-      'comment'             => 0,
-      'created'             => \Drupal::time()->getRequestTime(),
-      'field_cas_required'  => $cas_required,
-      'field_id' => $collectionId,
-      'field_description'   => $cDescription,
-      'field_key_image_id'  => $cKeyImage,
+      'nid'                  => NULL,
+      'langcode'             => 'en',
+      'uid'                  => $this->uid,
+      'type'                 => 'ps_collection',
+      'title'                => $collectionName,
+      'status'               => 1,
+      'promote'              => 0,
+      'comment'              => 0,
+      'created'              => \Drupal::time()->getRequestTime(),
+      'field_cas_required'   => $cas_required,
+      'field_id'             => $collectionId,
+      'field_description'    => $cDescription,
+      'field_key_image_id'   => $cKeyImage,
       'field_key_image_file' => isset($file) ?
         ['target_id' => $file->id()] : NULL,
-      'field_name'          => $collectionName,
-      'field_parent_id'     => $parentId,
+      'field_name'           => $collectionName,
+      'field_parent_id'      => $parentId,
     ]);
     try {
       $node->save();
@@ -427,7 +449,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     // Create nodes for children
     if (isset($cChildren)) {
       foreach ($cChildren as $child) {
-        switch(key($cChildren)) {
+        switch (key($cChildren)) {
           case 'Gallery':
             foreach ($child as $gallery) {
               $this->getGallery($gallery, $time, $update, $collectionId);
@@ -454,13 +476,13 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery?fields=gallery_id,name,description,f_list,modified_at&extend={%22Parents%22:{%22fields%22:%22collection_id%22,%22params%22:{}},%22KeyImage%22:{%22fields%22:%22image_id%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Visibility%22:{%22fields%22:%22mode%22,%22params%22:{}}}&api_key=$this->api_key");
     curl_setopt_array($curl, $this->options);
     $response = curl_exec($curl);
-    $err = curl_error($curl);
+    $err      = curl_error($curl);
     curl_close($curl);
     if ($err) {
       echo "cURL Error #:" . $err;
       exit(1);
     }
-    $response = json_decode($response, TRUE);
+    $response  = json_decode($response, TRUE);
     $galleries = $response['data']['Gallery'];
     unset($response);
 
@@ -484,15 +506,17 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param \DateTime $time
    * @param string $parentId
    */
-  private function getGallery(array &$gallery, DateTime &$time,
-    bool $update, string &$parentId = NULL) {
-    $galleryPermission = $gallery['Visibility']['mode'];
-    $galleryId = $gallery['gallery_id'];
-    $galleryModified = $gallery['modified_at'];
-    $galleryName = $gallery['name'];
+  private function getGallery(
+    array &$gallery, DateTime &$time,
+    bool $update, string &$parentId = NULL
+  ) {
+    $galleryPermission  = $gallery['Visibility']['mode'];
+    $galleryId          = $gallery['gallery_id'];
+    $galleryModified    = $gallery['modified_at'];
+    $galleryName        = $gallery['name'];
     $galleryDescription = $gallery['description'];
-    $galleryImage = $gallery['KeyImage']['image_id'];
-    $galleryImageFile = $gallery['KeyImage']['ImageLink']['link'];
+    $galleryImage       = $gallery['KeyImage']['image_id'];
+    $galleryImageFile   = $gallery['KeyImage']['ImageLink']['link'];
     unset($gallery);
 
     $cas_required = $this->getPermission($galleryPermission);
@@ -514,23 +538,23 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // Create node
     $node = Node::create([
-      'nid'                       => NULL,
-      'langcode'                  => 'en',
-      'uid'                       => $this->uid,
-      'type'                      => 'ps_gallery',
-      'title'                     => $galleryName,
-      'status'                    => 1,
-      'promote'                   => 0,
-      'comment'                   => 0,
-      'created'                   => \Drupal::time()->getRequestTime(),
-      'field_cas_required'        => $cas_required,
-      'field_id'          => $galleryId,
-      'field_description' => $galleryDescription,
-      'field_key_image_id'        => $galleryImage,
-      'field_key_image_file'      => isset($file) ?
+      'nid'                  => NULL,
+      'langcode'             => 'en',
+      'uid'                  => $this->uid,
+      'type'                 => 'ps_gallery',
+      'title'                => $galleryName,
+      'status'               => 1,
+      'promote'              => 0,
+      'comment'              => 0,
+      'created'              => \Drupal::time()->getRequestTime(),
+      'field_cas_required'   => $cas_required,
+      'field_id'             => $galleryId,
+      'field_description'    => $galleryDescription,
+      'field_key_image_id'   => $galleryImage,
+      'field_key_image_file' => isset($file) ?
         ['target_id' => $file->id()] : NULL,
-      'field_name'        => $galleryName,
-      'field_parent_id'           => $parentId,
+      'field_name'           => $galleryName,
+      'field_parent_id'      => $parentId,
     ]);
     try {
       $node->save();
@@ -552,15 +576,17 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param bool $update
    * @param \DateTime $time
    */
-  private function getPhotos(string &$parentId, bool $parentCas,
-    DateTime &$time, bool $update) {
+  private function getPhotos(
+    string &$parentId, bool $parentCas,
+    DateTime &$time, bool $update
+  ) {
     $page = 1;
     do {
       // Get list of images in gallery
-      $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery/$parentId/images?fields=image_id,f_visible&api_key=$this->api_key&per_page=750&page=$page&extend={%22Image%22:{%22fields%22:%22image_id,file_name,updated_at%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}}}");
+      $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery/$parentId/images?fields=image_id,f_visible&api_key=$this->api_key&per_page=750&page=$page&extend={%22Image%22:{%22fields%22:%22image_id,file_name,updated_at%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Iptc%22:{%22fields%22:%22keyword,credit,caption%22,%22params%22:{}}}");
       curl_setopt_array($curl, $this->options);
       $response = curl_exec($curl);
-      $err = curl_error($curl);
+      $err      = curl_error($curl);
       curl_close($curl);
       if ($err) {
         echo "cURL Error #:" . $err;
@@ -583,12 +609,15 @@ class PhotoShelterConfigForm extends ConfigFormBase {
           continue;
         }
 
-        $imageUpdate = $image['Image']['updated_at'];
-        $imageId = $image['image_id'];
-        $imageName = $image['Image']['file_name'];
+        $imageUpdate   = $image['Image']['updated_at'];
+        $imageId       = $image['image_id'];
+        $imageName     = $image['Image']['file_name'];
         $imageAuthLink = $image['ImageLink']['auth_link'];
-        $imageLink = $image['ImageLink']['link'];
-        $imageToken = $image['ImageLink']['token'];
+        $imageLink     = $image['ImageLink']['link'];
+        $imageToken    = $image['ImageLink']['token'];
+        $imageKeywords = $image['Image']['Iptc']['keyword'];
+        $imageCaption  = nl2br($image['Image']['Iptc']['caption']);
+        $imageCredit   = $image['Image']['Iptc']['credit'];
         unset($image);
 
         // Check if modified time is after time
@@ -601,31 +630,54 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         }
 
         if (isset($imageLink)) {
-          $file = File::create(['uri' => $imageLink]);
+          $file = File::create([
+            'uri' => $imageLink,
+            'alt' => $imageName,
+          ]);
           $file->save();
         }
 
         // Create node from $image and $keyImageId
         $node = Node::create([
-          'nid'                => NULL,
-          'langcode'           => 'en',
-          'uid'                => $this->uid,
-          'type'               => 'ps_image',
-          'title'              => $imageName,
-          'status'             => 1,
-          'promote'            => 0,
-          'comment'            => 0,
-          'created'            => \Drupal::time()->getRequestTime(),
-          'field_cas_required' => $parentCas,
-          'field_id'     => $imageId,
-          'field_name'    => $imageName,
-          'field_parent_id'    => $parentId,
-          'field_auth_link'    => $imageAuthLink,
-          'field_link'         => $imageLink,
+          'nid'                  => NULL,
+          'langcode'             => 'en',
+          'uid'                  => $this->uid,
+          'type'                 => 'ps_image',
+          'title'                => $imageName,
+          'status'               => 1,
+          'promote'              => 0,
+          'comment'              => 0,
+          'created'              => \Drupal::time()->getRequestTime(),
+          'field_cas_required'   => $parentCas,
+          'field_id'             => $imageId,
+          'field_name'           => $imageName,
+          'field_parent_id'      => $parentId,
+          'field_auth_link'      => $imageAuthLink,
+          'field_link'           => $imageLink,
           'field_key_image_file' => isset($file) ?
             ['target_id' => $file->id()] : NULL,
-          'field_auth_token' => $imageToken,
+          'field_auth_token'     => $imageToken,
+          'field_caption'        => $imageCaption,
+          'field_credit'         => $imageCredit,
         ]);
+        if (isset($imageKeywords)) {
+          $taxonomy = explode(', ', $imageKeywords);
+          foreach ($taxonomy as $term) {
+            $termExists = $this->termExists($term, 'tags');
+            if($termExists === 0) {
+              $keyword = Term::create([
+                'name' => $term,
+                'vid'  => 'tags',
+              ]);
+              $keyword->save();
+              $node->field_keywords->appendItem(['target_id' => $keyword->id()]);
+            }
+            else {
+              $node->field_keywords->appendItem(['target_id' => $termExists]);
+            }
+          }
+        }
+
         try {
           $node->save();
         } catch (Exception $e) {
@@ -667,8 +719,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * @param bool $isFullSync
    * @param \Drupal\Core\Config\Config $config
    */
-  private function updateConfigPostSync(Config &$config,
-    bool $isFullSync = FALSE) {
+  private function updateConfigPostSync(
+    Config &$config,
+    bool $isFullSync = FALSE
+  ) {
     try {
       $currentTime = new DateTime(NULL, new DateTimeZone('GMT'));
     } catch (Exception $e) {
@@ -682,5 +736,25 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $config->set('last_sync', $currentTime->format(
       DateTime::RFC850));
     $config->save();
+  }
+
+  /**
+   * @param null $name
+   * @param null $vid
+   *
+   * @return bool
+   */
+  private function termExists($name = NULL, $vid = NULL) {
+    $properties = [];
+    if (!empty($name)) {
+      $properties['name'] = $name;
+    }
+    if (!empty($vid)) {
+      $properties['vid'] = $vid;
+    }
+    $terms = \Drupal::entityManager()->getStorage('taxonomy_term')->loadByProperties($properties);
+    $term = reset($terms);
+
+    return !empty($term) ? $term->id() : 0;
   }
 }

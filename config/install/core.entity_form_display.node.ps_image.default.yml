@@ -4,9 +4,12 @@ dependencies:
   config:
     - field.field.node.ps_image.field_auth_link
     - field.field.node.ps_image.field_auth_token
+    - field.field.node.ps_image.field_caption
     - field.field.node.ps_image.field_cas_required
+    - field.field.node.ps_image.field_credit
     - field.field.node.ps_image.field_id
     - field.field.node.ps_image.field_key_image_file
+    - field.field.node.ps_image.field_keywords
     - field.field.node.ps_image.field_link
     - field.field.node.ps_image.field_name
     - field.field.node.ps_image.field_parent_id
@@ -17,6 +20,8 @@ dependencies:
     - link
     - path
     - text
+_core:
+  default_config_hash: yBKoYcBvxOpjbiskz3JqmORl8NiqruvXYoN6IDmhKKk
 id: node.ps_image.default
 targetEntityType: node
 bundle: ps_image
@@ -44,12 +49,28 @@ content:
     third_party_settings: {  }
     type: text_textfield
     region: content
+  field_caption:
+    weight: 41
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textarea
+    region: content
   field_cas_required:
     weight: 32
     settings:
       display_label: true
     third_party_settings: {  }
     type: boolean_checkbox
+    region: content
+  field_credit:
+    weight: 40
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textfield
     region: content
   field_id:
     weight: 34
@@ -66,6 +87,15 @@ content:
       preview_image_style: thumbnail
     third_party_settings: {  }
     type: image_image
+    region: content
+  field_keywords:
+    weight: 39
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
     region: content
   field_link:
     weight: 36

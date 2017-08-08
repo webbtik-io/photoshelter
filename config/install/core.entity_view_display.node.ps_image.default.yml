@@ -4,9 +4,12 @@ dependencies:
   config:
     - field.field.node.ps_image.field_auth_link
     - field.field.node.ps_image.field_auth_token
+    - field.field.node.ps_image.field_caption
     - field.field.node.ps_image.field_cas_required
+    - field.field.node.ps_image.field_credit
     - field.field.node.ps_image.field_id
     - field.field.node.ps_image.field_key_image_file
+    - field.field.node.ps_image.field_keywords
     - field.field.node.ps_image.field_link
     - field.field.node.ps_image.field_name
     - field.field.node.ps_image.field_parent_id
@@ -16,6 +19,8 @@ dependencies:
     - link
     - text
     - user
+_core:
+  default_config_hash: DnQoRPB0iC-2RaPacNDspEFzFEsHZwBKTatSHCK_D-Y
 id: node.ps_image.default
 targetEntityType: node
 bundle: ps_image
@@ -40,6 +45,13 @@ content:
     third_party_settings: {  }
     type: text_default
     region: content
+  field_caption:
+    weight: 111
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
   field_cas_required:
     weight: 102
     label: above
@@ -49,6 +61,13 @@ content:
       format_custom_true: ''
     third_party_settings: {  }
     type: boolean
+    region: content
+  field_credit:
+    weight: 110
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
     region: content
   field_id:
     weight: 104
@@ -65,6 +84,14 @@ content:
       image_link: ''
     third_party_settings: {  }
     type: image
+    region: content
+  field_keywords:
+    weight: 109
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
     region: content
   field_link:
     weight: 106

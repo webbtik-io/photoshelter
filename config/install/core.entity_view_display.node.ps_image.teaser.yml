@@ -3,6 +3,14 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.ps_image.field_auth_link
+    - field.field.node.ps_image.field_auth_token
+    - field.field.node.ps_image.field_cas_required
+    - field.field.node.ps_image.field_id
+    - field.field.node.ps_image.field_key_image_file
+    - field.field.node.ps_image.field_link
+    - field.field.node.ps_image.field_name
+    - field.field.node.ps_image.field_parent_id
     - node.type.ps_image
   module:
     - user
@@ -14,4 +22,12 @@ content:
   links:
     weight: 100
     region: content
-hidden: {  }
+hidden:
+  field_auth_link: true
+  field_auth_token: true
+  field_cas_required: true
+  field_id: true
+  field_key_image_file: true
+  field_link: true
+  field_name: true
+  field_parent_id: true
