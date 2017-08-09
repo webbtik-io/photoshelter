@@ -3,14 +3,14 @@ status: true
 dependencies:
   module:
     - node
-    - text
+    - core
 id: node.field_auth_token
 field_name: field_auth_token
 entity_type: node
-type: text
+type: string
 settings:
   max_length: 255
-module: text
+module: core
 locked: false
 cardinality: 1
 translatable: true
