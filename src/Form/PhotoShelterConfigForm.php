@@ -78,10 +78,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       CURLOPT_CUSTOMREQUEST    => "GET",
       CURLOPT_COOKIEFILE       => $this->cookie,
       CURLOPT_COOKIEJAR        => $this->cookie,
-      CURLOPT_SSL_VERIFYSTATUS => FALSE,
       CURLOPT_SSL_VERIFYPEER   => FALSE,
       CURLOPT_FOLLOWLOCATION
     ];
+    if (defined('CURLOPT_SSL_VERIFYSTATUS')) {
+      $this->options[CURLOPT_SSL_VERIFYSTATUS] = FALSE;
+    }
     $config           = $this->config('photoshelter.settings');
     $this->connection = $connection;
     $this->api_key    = urlencode($config->get('api_key'));
