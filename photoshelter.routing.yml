@@ -4,12 +4,14 @@ photoshelter_config_form:
     _form: '\Drupal\photoshelter\Form\PhotoShelterConfigForm'
     _title: 'PhotoShelter Config Form'
   requirements:
-    _role: 'administrator'
+    _permission: 'administer photoshelter'
   options:
     _admin_route: true
 help.page.photoshelter:
   path: 'admin/help/photoshelter'
   defaults:
     _title: 'PhotoShelter Help'
+  requirements:
+    _permission: 'administer photoshelter'
   options:
     _admin_route: true
