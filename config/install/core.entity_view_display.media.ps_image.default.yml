@@ -1,40 +1,29 @@
 langcode: en
 status: true
 dependencies:
+  config:
+  - field.field.media.ps_image.field_media_image
+  - field.field.media.ps_image.field_ps_caption
+  - field.field.media.ps_image.field_ps_credit
+  - field.field.media.ps_image.field_ps_id
+  - field.field.media.ps_image.field_ps_modified_at
+  - field.field.media.ps_image.field_ps_parent_gallery
+  - field.field.media.ps_image.field_ps_parent_id
+  - field.field.media.ps_image.field_ps_permission
+  - field.field.media.ps_image.field_ps_tags
+  - media.type.ps_image
   enforced:
     module:
-      - photoshelter
-  config:
-    - field.field.media.ps_image.field_media_image
-    - field.field.media.ps_image.field_ps_caption
-    - field.field.media.ps_image.field_ps_credit
-    - field.field.media.ps_image.field_ps_id
-    - field.field.media.ps_image.field_ps_modified_at
-    - field.field.media.ps_image.field_ps_parent_id
-    - field.field.media.ps_image.field_ps_permission
-    - field.field.media.ps_image.field_ps_tags
-    - image.style.thumbnail
-    - media.type.ps_image
+    - photoshelter
   module:
-    - image
-    - user
+  - image
 id: media.ps_image.default
 targetEntityType: media
 bundle: ps_image
 mode: default
 content:
-  created:
-    label: hidden
-    type: timestamp
-    weight: 0
-    region: content
-    settings:
-      date_format: medium
-      custom_date_format: ''
-      timezone: ''
-    third_party_settings: {  }
   field_media_image:
-    weight: 6
+    weight: 0
     label: above
     settings:
       image_style: ''
@@ -43,14 +32,14 @@ content:
     type: image
     region: content
   field_ps_caption:
-    weight: 11
+    weight: 1
     label: above
     settings: {  }
     third_party_settings: {  }
     type: basic_string
     region: content
   field_ps_credit:
-    weight: 12
+    weight: 2
     label: above
     settings:
       link_to_entity: false
@@ -58,31 +47,23 @@ content:
     type: string
     region: content
   field_ps_id:
-    weight: 7
+    weight: 4
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
     region: content
-  field_ps_modified_at:
-    weight: 10
+  field_ps_parent_gallery:
+    weight: 6
     label: above
     settings:
-      link_to_entity: false
+      link: true
     third_party_settings: {  }
-    type: string
+    type: entity_reference_label
     region: content
   field_ps_parent_id:
-    weight: 8
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_ps_permission:
-    weight: 9
+    weight: 5
     label: above
     settings:
       link_to_entity: false
@@ -90,28 +71,17 @@ content:
     type: string
     region: content
   field_ps_tags:
-    weight: 13
+    weight: 3
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
     region: content
-  thumbnail:
-    type: image
-    weight: 5
-    label: hidden
-    settings:
-      image_style: thumbnail
-      image_link: ''
-    region: content
-    third_party_settings: {  }
-  uid:
-    label: hidden
-    type: author
-    weight: 0
-    region: content
-    settings: {  }
-    third_party_settings: {  }
 hidden:
+  created: true
+  field_ps_modified_at: true
+  field_ps_permission: true
   name: true
+  thumbnail: true
+  uid: true

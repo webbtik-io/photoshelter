@@ -1,22 +1,23 @@
 langcode: en
 status: true
 dependencies:
+  config:
+  - field.field.taxonomy_term.ps_gallery.field_ps_id
+  - field.field.taxonomy_term.ps_gallery.field_ps_key_image
+  - field.field.taxonomy_term.ps_gallery.field_ps_key_image_id
+  - field.field.taxonomy_term.ps_gallery.field_ps_modified_at
+  - field.field.taxonomy_term.ps_gallery.field_ps_parent_collection
+  - field.field.taxonomy_term.ps_gallery.field_ps_parent_id
+  - field.field.taxonomy_term.ps_gallery.field_ps_permission
+  - image.style.thumbnail
+  - taxonomy.vocabulary.ps_gallery
   enforced:
     module:
-      - photoshelter
-  config:
-    - field.field.taxonomy_term.ps_gallery.field_ps_id
-    - field.field.taxonomy_term.ps_gallery.field_ps_key_image
-    - field.field.taxonomy_term.ps_gallery.field_ps_key_image_id
-    - field.field.taxonomy_term.ps_gallery.field_ps_modified_at
-    - field.field.taxonomy_term.ps_gallery.field_ps_parent_id
-    - field.field.taxonomy_term.ps_gallery.field_ps_permission
-    - image.style.thumbnail
-    - taxonomy.vocabulary.ps_gallery
+    - photoshelter
   module:
-    - image
-    - path
-    - text
+  - image
+  - path
+  - text
 id: taxonomy_term.ps_gallery.default
 targetEntityType: taxonomy_term
 bundle: ps_gallery
@@ -39,7 +40,7 @@ content:
     type: string_textfield
     region: content
   field_ps_key_image:
-    weight: 7
+    weight: 8
     settings:
       progress_indicator: throbber
       preview_image_style: thumbnail
@@ -47,7 +48,7 @@ content:
     type: image_image
     region: content
   field_ps_key_image_id:
-    weight: 6
+    weight: 7
     settings:
       size: 60
       placeholder: ''
@@ -55,12 +56,21 @@ content:
     type: string_textfield
     region: content
   field_ps_modified_at:
-    weight: 4
+    weight: 5
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
+    region: content
+  field_ps_parent_collection:
+    weight: 4
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
     region: content
   field_ps_parent_id:
     weight: 3
@@ -71,7 +81,7 @@ content:
     type: string_textfield
     region: content
   field_ps_permission:
-    weight: 5
+    weight: 6
     settings:
       size: 60
       placeholder: ''
@@ -88,7 +98,7 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 8
+    weight: 9
     region: content
     settings: {  }
     third_party_settings: {  }

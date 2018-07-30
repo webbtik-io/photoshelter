@@ -446,6 +446,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'field_ps_permission'   => $cas_required,
       'field_ps_id'             => $collectionId,
       'field_ps_parent_id'      => $parentId,
+      'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
       'field_ps_modified_at' => $cModified,
       'field_ps_key_image_id'   => $cKeyImage,
       'field_ps_key_image' => isset($file) ?
@@ -561,6 +562,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'field_ps_permission'   => $cas_required,
       'field_ps_id'             => $galleryId,
       'field_ps_parent_id'      => $parentId,
+      'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
       'field_ps_modified_at' => $galleryModified,
       'field_ps_key_image_id'   => $galleryImage,
       'field_ps_key_image' => isset($file) ?
@@ -656,6 +658,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
           'field_ps_permission'   => $parentCas,
           'field_ps_id'             => $imageId,
           'field_ps_parent_id'      => $parentId,
+          'field_ps_parent_gallery' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
           'field_ps_caption'        => $imageCaption,
           'field_ps_credit'         => $imageCredit,
           'field_media_image' => isset($file) ?
@@ -759,5 +762,21 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $term = reset($terms);
 
     return !empty($term) ? $term->id() : 0;
+  }
+
+  /**
+   * Get the parent term id.
+   *
+   * @param string $parent_ps_id
+   *   Photoshelter id of the parent collection or gallery.
+   *
+   * @return string
+   */
+  private function getParentTerm($parent_ps_id) {
+    $query = \Drupal::entityQuery('taxonomy_term');
+    $query->condition('field_ps_id', $parent_ps_id);
+    $tids = $query->execute();
+    $tid = !empty($tids) ? reset($tids) : '';
+    return $tid;
   }
 }

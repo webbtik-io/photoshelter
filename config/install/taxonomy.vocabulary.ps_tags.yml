@@ -4,7 +4,7 @@ dependencies:
   enforced:
     module:
       - photoshelter
-name: 'PS tags'
+name: 'PS Tags'
 vid: ps_tags
 description: 'keywords for photoshelter images'
 hierarchy: 0
