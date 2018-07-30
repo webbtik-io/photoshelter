@@ -437,27 +437,46 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $file->save();
     }
 
-    // Create term from $collection and $keyImageId
-    $term = Term::create([
-      'langcode'             => 'en',
-      'vid'                 => 'ps_collection',
-      'name'           => $collectionName,
-      'description'    => $cDescription,
-      'field_ps_permission'   => $cas_required,
-      'field_ps_id'             => $collectionId,
-      'field_ps_parent_id'      => $parentId,
-      'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
-      'field_ps_modified_at' => $cModified,
-      'field_ps_key_image_id'   => $cKeyImage,
-      'field_ps_key_image' => isset($file) ?
-        ['target_id' => $file->id()] : NULL,
-    ]);
+    // If already exist, update instead of create.
+    $collection_id = $this->collectionExists($collectionId);
+    if (!empty($collection_id)) {
+      $term = Term::load($collection_id);
+      if ($term->get('field_ps_modified_at')->getString() != $cModified) {
+        $term->set('name', $collectionName);
+        $term->set('description', $cDescription);
+        $term->set('field_ps_permission', $cas_required);
+        $term->set('field_ps_parent_id', $parentId);
+        $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+        $term->set('field_ps_modified_at', $cModified);
+        $term->set('field_ps_key_image_id', $cKeyImage);
+        $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
+      }
+    }
+    else {
+      // Create term from $collection and $keyImageId
+      $term = Term::create([
+        'langcode'             => 'en',
+        'vid'                 => 'ps_collection',
+        'name'           => $collectionName,
+        'description'    => $cDescription,
+        'field_ps_permission'   => $cas_required,
+        'field_ps_id'             => $collectionId,
+        'field_ps_parent_id'      => $parentId,
+        'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
+        'field_ps_modified_at' => $cModified,
+        'field_ps_key_image_id'   => $cKeyImage,
+        'field_ps_key_image' => isset($file) ?
+          ['target_id' => $file->id()] : NULL,
+      ]);
+    }
+
     try {
       $term->save();
     } catch (Exception $e) {
       echo $e->getMessage();
       exit(1);
     }
+
     if (isset($file)) {
       unset($file);
     }
@@ -553,27 +572,46 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $file->save();
     }
 
-    // Create node
-    $term = Term::create([
-      'langcode'             => 'en',
-      'vid'                 => 'ps_gallery',
-      'name'           => $galleryName,
-      'description'    => $galleryDescription,
-      'field_ps_permission'   => $cas_required,
-      'field_ps_id'             => $galleryId,
-      'field_ps_parent_id'      => $parentId,
-      'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
-      'field_ps_modified_at' => $galleryModified,
-      'field_ps_key_image_id'   => $galleryImage,
-      'field_ps_key_image' => isset($file) ?
-        ['target_id' => $file->id()] : NULL,
-    ]);
+    // If already exists, update instead of create
+    $gallery_id = $this->galleryExists($galleryId);
+    if (!empty($gallery_id)) {
+      $term = Term::load($gallery_id);
+      if ($term->get('field_ps_modified_at')->getString() != $galleryModified) {
+        $term->set('name', $galleryName);
+        $term->set('description', $galleryDescription);
+        $term->set('field_ps_permission', $cas_required);
+        $term->set('field_ps_parent_id', $parentId);
+        $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+        $term->set('field_ps_modified_at', $galleryModified);
+        $term->set('field_ps_key_image_id', $galleryImage);
+        $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
+      }
+    }
+    else {
+      // Create node
+      $term = Term::create([
+        'langcode'             => 'en',
+        'vid'                 => 'ps_gallery',
+        'name'           => $galleryName,
+        'description'    => $galleryDescription,
+        'field_ps_permission'   => $cas_required,
+        'field_ps_id'             => $galleryId,
+        'field_ps_parent_id'      => $parentId,
+        'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
+        'field_ps_modified_at' => $galleryModified,
+        'field_ps_key_image_id'   => $galleryImage,
+        'field_ps_key_image' => isset($file) ?
+          ['target_id' => $file->id()] : NULL,
+      ]);
+    }
+
     try {
       $term->save();
     } catch (Exception $e) {
       echo $e->getMessage();
       exit(1);
     }
+
     if (isset($file)) {
       unset($file);
     }
@@ -647,23 +685,41 @@ class PhotoShelterConfigForm extends ConfigFormBase {
           $file->save();
         }
 
-        // Create node from $image and $keyImageId
-        $media = Media::create([
-          'langcode'             => 'en',
-          'uid'                  => $this->uid,
-          'bundle'                 => 'ps_image',
-          'name'                => $imageName,
-          'status'               => 1,
-          'created'              => \Drupal::time()->getRequestTime(),
-          'field_ps_permission'   => $parentCas,
-          'field_ps_id'             => $imageId,
-          'field_ps_parent_id'      => $parentId,
-          'field_ps_parent_gallery' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
-          'field_ps_caption'        => $imageCaption,
-          'field_ps_credit'         => $imageCredit,
-          'field_media_image' => isset($file) ?
-            ['target_id' => $file->id(), 'alt' => $imageName,] : NULL,
-        ]);
+        // If already exists, update instead of create
+        $media_id = $this->imageExists($imageId);
+        if (!empty($media_id)) {
+          $media = Media::load($media_id);
+          if ($media->get('field_ps_modified_at')->getString() != $imageUpdate) {
+            $media->set('name', $imageName);
+            $media->set('field_ps_permission', $parentCas);
+            $media->set('field_ps_parent_id', $parentId);
+            $media->set('field_ps_parent_gallery', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+            $media->set('field_ps_modified_at', $imageUpdate);
+            $media->set('field_ps_caption', $imageCaption);
+            $media->set('field_ps_credit', $imageCredit);
+            $media->set('field_media_image', isset($file) ? ['target_id' => $file->id(), 'alt' => $imageName,] : NULL);
+          }
+        }
+        else {
+          // Create node from $image and $keyImageId
+          $media = Media::create([
+            'langcode'             => 'en',
+            'uid'                  => $this->uid,
+            'bundle'                 => 'ps_image',
+            'name'                => $imageName,
+            'status'               => 1,
+            'created'              => \Drupal::time()->getRequestTime(),
+            'field_ps_permission'   => $parentCas,
+            'field_ps_id'             => $imageId,
+            'field_ps_parent_id'      => $parentId,
+            'field_ps_parent_gallery' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
+            'field_ps_modified_at' => $imageUpdate,
+            'field_ps_caption'        => $imageCaption,
+            'field_ps_credit'         => $imageCredit,
+            'field_media_image' => isset($file) ?
+              ['target_id' => $file->id(), 'alt' => $imageName,] : NULL,
+          ]);
+        }
 
         if (isset($imageKeywords) && !empty($imageKeywords)) {
           $taxonomy = explode(',', $imageKeywords);
@@ -778,5 +834,53 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $tids = $query->execute();
     $tid = !empty($tids) ? reset($tids) : '';
     return $tid;
+  }
+
+  /**
+   * @param string $collection_ps_id
+   *   Photoshelter id of the collection.
+   *
+   * @return string
+   *   Taxonomy term id.
+   */
+  private function collectionExists($collection_ps_id) {
+    $query = \Drupal::entityQuery('taxonomy_term');
+    $query->condition('vid', 'ps_collection');
+    $query->condition('field_ps_id', $collection_ps_id);
+    $tids = $query->execute();
+    $tid = !empty($tids) ? reset($tids) : '';
+    return $tid;
+  }
+
+  /**
+   * @param string $gallery_ps_id
+   *   Photoshelter id of the gallery.
+   *
+   * @return string
+   *   Taxonomy term id.
+   */
+  private function galleryExists($gallery_ps_id) {
+    $query = \Drupal::entityQuery('taxonomy_term');
+    $query->condition('vid', 'ps_gallery');
+    $query->condition('field_ps_id', $gallery_ps_id);
+    $tids = $query->execute();
+    $tid = !empty($tids) ? reset($tids) : '';
+    return $tid;
+  }
+
+  /**
+   * @param string $image_ps_id
+   *   Photoshelter id of the image.
+   *
+   * @return string
+   *   Media id.
+   */
+  private function imageExists($image_ps_id) {
+    $query = \Drupal::entityQuery('media');
+    $query->condition('bundle', 'ps_image');
+    $query->condition('field_ps_id', $image_ps_id);
+    $mids = $query->execute();
+    $mid = !empty($mids) ? reset($mids) : '';
+    return $mid;
   }
 }
