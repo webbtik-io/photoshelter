@@ -662,7 +662,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
           'field_caption'        => $imageCaption,
           'field_credit'         => $imageCredit,
         ]);
-        if (isset($imageKeywords)) {
+
+        if (isset($imageKeywords) && !empty($imageKeywords)) {
           $taxonomy = explode(', ', $imageKeywords);
           foreach ($taxonomy as $term) {
             $termExists = $this->termExists($term, 'tags');
