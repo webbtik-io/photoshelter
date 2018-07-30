@@ -277,6 +277,25 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         $form_state->setError($form,
           'Invalid login credentials or API key.');
       }
+      if (isset($jsonResponse['data']['org'][0]['id']) && !empty($jsonResponse['data']['org'][0]['id'])) {
+        $org_id = $jsonResponse['data']['org'][0]['id'];
+        $endpoint = '/psapi/v3/mem/organization/' . $org_id . '/authenticate';
+        $fullUrl  = $base_url . $endpoint .
+          '?api_key=' . $api_key;
+        $ch = curl_init($fullUrl);
+        curl_setopt_array($ch, $this->options);
+        $response = curl_exec($ch);
+        $jsonResponse = json_decode($response, TRUE);
+        if ($jsonResponse['status'] != 'ok') {
+          $form_state->setError($form,
+            'Invalid organization id.');
+        }
+        curl_close($ch);
+        drupal_set_message(t('The authentication as an organization is successfull'));
+      }
+      else {
+        drupal_set_message(t('The authentication is successfull'));
+      }
     }
   }
 
