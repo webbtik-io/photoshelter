@@ -1,15 +1,19 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - photoshelter
   module:
-    - node
-    - core
-id: node.field_key_image_id
-field_name: field_key_image_id
-entity_type: node
+    - media
+id: media.field_ps_credit
+field_name: field_ps_credit
+entity_type: media
 type: string
 settings:
   max_length: 255
+  is_ascii: false
+  case_sensitive: false
 module: core
 locked: false
 cardinality: 1

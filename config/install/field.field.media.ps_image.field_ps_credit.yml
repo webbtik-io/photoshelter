@@ -1,14 +1,15 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - photoshelter
   config:
-    - field.storage.node.field_credit
-    - node.type.ps_image
-  module:
-    - core
-id: node.ps_image.field_credit
-field_name: field_credit
-entity_type: node
+    - field.storage.media.field_ps_credit
+    - media.type.ps_image
+id: media.ps_image.field_ps_credit
+field_name: field_ps_credit
+entity_type: media
 bundle: ps_image
 label: Credit
 description: ''

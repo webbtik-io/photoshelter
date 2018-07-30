@@ -32,6 +32,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\Entity\Node;
 use Drupal\file\Entity\File;
+use Drupal\media\Entity\Media;
 use Drupal\taxonomy\Entity\Term;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -621,10 +622,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         $imageUpdate   = $image['Image']['updated_at'];
         $imageId       = $image['image_id'];
         $imageName     = $image['Image']['file_name'];
-        $imageAuthLink = $image['ImageLink']['auth_link'];
-        $imageLink     = $image['ImageLink']['link'];
-        $imageToken    = $image['ImageLink']['token'];
         $imageKeywords = $image['Image']['Iptc']['keyword'];
+        $imageLink     = $image['ImageLink']['link'];
         $imageCaption  = nl2br($image['Image']['Iptc']['caption']);
         $imageCredit   = $image['Image']['Iptc']['credit'];
         unset($image);
@@ -647,49 +646,43 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         }
 
         // Create node from $image and $keyImageId
-        $node = Node::create([
-          'nid'                  => NULL,
+        $media = Media::create([
           'langcode'             => 'en',
           'uid'                  => $this->uid,
-          'type'                 => 'ps_image',
-          'title'                => $imageName,
+          'bundle'                 => 'ps_image',
+          'name'                => $imageName,
           'status'               => 1,
-          'promote'              => 0,
-          'comment'              => 0,
           'created'              => \Drupal::time()->getRequestTime(),
-          'field_cas_required'   => $parentCas,
-          'field_id'             => $imageId,
-          'field_name'           => $imageName,
-          'field_parent_id'      => $parentId,
-          'field_auth_link'      => $imageAuthLink,
-          'field_link'           => $imageLink,
-          'field_key_image_file' => isset($file) ?
-            ['target_id' => $file->id()] : NULL,
-          'field_auth_token'     => $imageToken,
-          'field_caption'        => $imageCaption,
-          'field_credit'         => $imageCredit,
+          'field_ps_permission'   => $parentCas,
+          'field_ps_id'             => $imageId,
+          'field_ps_parent_id'      => $parentId,
+          'field_ps_caption'        => $imageCaption,
+          'field_ps_credit'         => $imageCredit,
+          'field_media_image' => isset($file) ?
+            ['target_id' => $file->id(), 'alt' => $imageName,] : NULL,
         ]);
 
         if (isset($imageKeywords) && !empty($imageKeywords)) {
-          $taxonomy = explode(', ', $imageKeywords);
+          $taxonomy = explode(',', $imageKeywords);
           foreach ($taxonomy as $term) {
+            $term = trim($term);
             $termExists = $this->termExists($term, 'tags');
             if($termExists === 0) {
               $keyword = Term::create([
                 'name' => $term,
-                'vid'  => 'tags',
+                'vid'  => 'ps_tags',
               ]);
               $keyword->save();
-              $node->field_keywords->appendItem(['target_id' => $keyword->id()]);
+              $media->field_ps_tags->appendItem(['target_id' => $keyword->id()]);
             }
             else {
-              $node->field_keywords->appendItem(['target_id' => $termExists]);
+              $media->field_ps_tags->appendItem(['target_id' => $termExists]);
             }
           }
         }
 
         try {
-          $node->save();
+          $media->save();
         } catch (Exception $e) {
           echo $e->getMessage();
           exit(1);
@@ -697,7 +690,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         if (isset($file)) {
           unset($file);
         }
-        unset($node);
+        unset($media);
       }
 
       if ($page !== 0) {

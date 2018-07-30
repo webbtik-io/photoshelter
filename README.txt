@@ -5,6 +5,7 @@ This module is meant to integrate photo's stored on PhotoShelter onto your site.
 # Dependencies
 
 - Remote stream wrapper
+- Media
 
 # Requirements
 

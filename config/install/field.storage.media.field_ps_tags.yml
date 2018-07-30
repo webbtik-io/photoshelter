@@ -1,12 +1,15 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - photoshelter
   module:
-    - node
+    - media
     - taxonomy
-id: node.field_keywords
-field_name: field_keywords
-entity_type: node
+id: media.field_ps_tags
+field_name: field_ps_tags
+entity_type: media
 type: entity_reference
 settings:
   target_type: taxonomy_term

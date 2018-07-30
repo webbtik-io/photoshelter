@@ -1,15 +1,17 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - photoshelter
   module:
-    - node
-    - core
-id: node.field_id
-field_name: field_id
-entity_type: node
-type: string
+    - media
+id: media.field_ps_caption
+field_name: field_ps_caption
+entity_type: media
+type: string_long
 settings:
-  max_length: 255
+  case_sensitive: false
 module: core
 locked: false
 cardinality: 1

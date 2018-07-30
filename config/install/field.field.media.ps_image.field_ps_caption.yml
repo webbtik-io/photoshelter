@@ -1,14 +1,15 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - photoshelter
   config:
-    - field.storage.node.field_caption
-    - node.type.ps_image
-  module:
-    - core
-id: node.ps_image.field_caption
-field_name: field_caption
-entity_type: node
+    - field.storage.media.field_ps_caption
+    - media.type.ps_image
+id: media.ps_image.field_ps_caption
+field_name: field_ps_caption
+entity_type: media
 bundle: ps_image
 label: Caption
 description: ''
