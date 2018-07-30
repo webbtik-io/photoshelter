@@ -124,7 +124,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#default_value' => $config->get('email'),
     ];
     $form['password']  = [
-      '#type'          => 'password',
+      '#type'          => 'textfield',
       '#title'         =>
         $this->t('Your PhotoShelter account password.'),
       '#default_value' => $config->get('password'),
@@ -441,16 +441,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $collection_id = $this->collectionExists($collectionId);
     if (!empty($collection_id)) {
       $term = Term::load($collection_id);
-      if ($term->get('field_ps_modified_at')->getString() != $cModified) {
-        $term->set('name', $collectionName);
-        $term->set('description', $cDescription);
-        $term->set('field_ps_permission', $cas_required);
-        $term->set('field_ps_parent_id', $parentId);
-        $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
-        $term->set('field_ps_modified_at', $cModified);
-        $term->set('field_ps_key_image_id', $cKeyImage);
-        $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
-      }
+      $term->set('name', $collectionName);
+      $term->set('description', $cDescription);
+      $term->set('field_ps_permission', $cas_required);
+      $term->set('field_ps_parent_id', $parentId);
+      $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+      $term->set('field_ps_modified_at', $cModified);
+      $term->set('field_ps_key_image_id', $cKeyImage);
+      $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
     }
     else {
       // Create term from $collection and $keyImageId
@@ -576,16 +574,14 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $gallery_id = $this->galleryExists($galleryId);
     if (!empty($gallery_id)) {
       $term = Term::load($gallery_id);
-      if ($term->get('field_ps_modified_at')->getString() != $galleryModified) {
-        $term->set('name', $galleryName);
-        $term->set('description', $galleryDescription);
-        $term->set('field_ps_permission', $cas_required);
-        $term->set('field_ps_parent_id', $parentId);
-        $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
-        $term->set('field_ps_modified_at', $galleryModified);
-        $term->set('field_ps_key_image_id', $galleryImage);
-        $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
-      }
+      $term->set('name', $galleryName);
+      $term->set('description', $galleryDescription);
+      $term->set('field_ps_permission', $cas_required);
+      $term->set('field_ps_parent_id', $parentId);
+      $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+      $term->set('field_ps_modified_at', $galleryModified);
+      $term->set('field_ps_key_image_id', $galleryImage);
+      $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
     }
     else {
       // Create node
@@ -689,16 +685,15 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         $media_id = $this->imageExists($imageId);
         if (!empty($media_id)) {
           $media = Media::load($media_id);
-          if ($media->get('field_ps_modified_at')->getString() != $imageUpdate) {
-            $media->set('name', $imageName);
-            $media->set('field_ps_permission', $parentCas);
-            $media->set('field_ps_parent_id', $parentId);
-            $media->set('field_ps_parent_gallery', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
-            $media->set('field_ps_modified_at', $imageUpdate);
-            $media->set('field_ps_caption', $imageCaption);
-            $media->set('field_ps_credit', $imageCredit);
-            $media->set('field_media_image', isset($file) ? ['target_id' => $file->id(), 'alt' => $imageName,] : NULL);
-          }
+          $media->set('name', $imageName);
+          $media->set('field_ps_permission', $parentCas);
+          $media->set('field_ps_parent_id', $parentId);
+          $media->set('field_ps_parent_gallery', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+          $media->set('field_ps_modified_at', $imageUpdate);
+          $media->set('field_ps_caption', $imageCaption);
+          $media->set('field_ps_credit', $imageCredit);
+          $media->set('field_media_image', isset($file) ? ['target_id' => $file->id(), 'alt' => $imageName,] : NULL);
+
         }
         else {
           // Create node from $image and $keyImageId
@@ -725,7 +720,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
           $taxonomy = explode(',', $imageKeywords);
           foreach ($taxonomy as $term) {
             $term = trim($term);
-            $termExists = $this->termExists($term, 'tags');
+            $termExists = $this->termExists($term, 'ps_tags');
             if($termExists === 0) {
               $keyword = Term::create([
                 'name' => $term,
