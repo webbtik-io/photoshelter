@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - photoshelter
+name: 'PS Collection'
+vid: ps_collection
+description: 'photoshelter collection'
+hierarchy: 0
+weight: 0

@@ -436,28 +436,22 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $file->save();
     }
 
-    // Create node from $collection and $keyImageId
-    $node = Node::create([
-      'nid'                  => NULL,
+    // Create term from $collection and $keyImageId
+    $term = Term::create([
       'langcode'             => 'en',
-      'uid'                  => $this->uid,
-      'type'                 => 'ps_collection',
-      'title'                => $collectionName,
-      'status'               => 1,
-      'promote'              => 0,
-      'comment'              => 0,
-      'created'              => \Drupal::time()->getRequestTime(),
-      'field_cas_required'   => $cas_required,
-      'field_id'             => $collectionId,
-      'field_description'    => $cDescription,
-      'field_key_image_id'   => $cKeyImage,
-      'field_key_image_file' => isset($file) ?
+      'vid'                 => 'ps_collection',
+      'name'           => $collectionName,
+      'description'    => $cDescription,
+      'field_ps_permission'   => $cas_required,
+      'field_ps_id'             => $collectionId,
+      'field_ps_parent_id'      => $parentId,
+      'field_ps_modified_at' => $cModified,
+      'field_ps_key_image_id'   => $cKeyImage,
+      'field_ps_key_image' => isset($file) ?
         ['target_id' => $file->id()] : NULL,
-      'field_name'           => $collectionName,
-      'field_parent_id'      => $parentId,
     ]);
     try {
-      $node->save();
+      $term->save();
     } catch (Exception $e) {
       echo $e->getMessage();
       exit(1);
@@ -465,7 +459,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     if (isset($file)) {
       unset($file);
     }
-    unset($node);
+    unset($term);
 
     // Create nodes for children
     if (isset($cChildren)) {
@@ -558,27 +552,21 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     }
 
     // Create node
-    $node = Node::create([
-      'nid'                  => NULL,
+    $term = Term::create([
       'langcode'             => 'en',
-      'uid'                  => $this->uid,
-      'type'                 => 'ps_gallery',
-      'title'                => $galleryName,
-      'status'               => 1,
-      'promote'              => 0,
-      'comment'              => 0,
-      'created'              => \Drupal::time()->getRequestTime(),
-      'field_cas_required'   => $cas_required,
-      'field_id'             => $galleryId,
-      'field_description'    => $galleryDescription,
-      'field_key_image_id'   => $galleryImage,
-      'field_key_image_file' => isset($file) ?
+      'vid'                 => 'ps_gallery',
+      'name'           => $galleryName,
+      'description'    => $galleryDescription,
+      'field_ps_permission'   => $cas_required,
+      'field_ps_id'             => $galleryId,
+      'field_ps_parent_id'      => $parentId,
+      'field_ps_modified_at' => $galleryModified,
+      'field_ps_key_image_id'   => $galleryImage,
+      'field_ps_key_image' => isset($file) ?
         ['target_id' => $file->id()] : NULL,
-      'field_name'           => $galleryName,
-      'field_parent_id'      => $parentId,
     ]);
     try {
-      $node->save();
+      $term->save();
     } catch (Exception $e) {
       echo $e->getMessage();
       exit(1);
@@ -586,7 +574,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     if (isset($file)) {
       unset($file);
     }
-    unset($node);
+    unset($term);
 
     $this->getPhotos($galleryId, $cas_required, $time, $update);
   }

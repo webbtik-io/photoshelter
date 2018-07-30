@@ -1,16 +1,19 @@
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - photoshelter
   config:
-    - field.storage.node.field_key_image_file
-    - node.type.ps_collection
+    - field.storage.taxonomy_term.field_ps_key_image
+    - taxonomy.vocabulary.ps_gallery
   module:
     - image
-id: node.ps_collection.field_key_image_file
-field_name: field_key_image_file
-entity_type: node
-bundle: ps_collection
-label: 'Key Image File'
+id: taxonomy_term.ps_gallery.field_ps_key_image
+field_name: field_ps_key_image
+entity_type: taxonomy_term
+bundle: ps_gallery
+label: 'Key image'
 description: ''
 required: false
 translatable: false
@@ -18,7 +21,7 @@ default_value: {  }
 default_value_callback: ''
 settings:
   file_directory: '[date:custom:Y]-[date:custom:m]'
-  file_extensions: 'png gif jpg jpeg tiff tif'
+  file_extensions: 'png gif jpg jpeg'
   max_filesize: ''
   max_resolution: ''
   min_resolution: ''
