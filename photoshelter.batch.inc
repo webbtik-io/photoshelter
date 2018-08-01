@@ -18,15 +18,18 @@ function photoshelter_sync_gallery(array $gallery, DateTime $time, $update, $par
 
 function photoshelter_sync_finished($success, $results, $operations) {
   $messenger = \Drupal::messenger();
+  $logger = \Drupal::logger('photoshelter');
 
   if ($success) {
     $message = \Drupal::translation()->formatPlural(
       count($results),
       '1 Synchronized gallery', '@count Synchronized galleries.'
     );
+    $logger->notice($message);
   }
   else {
     $message = t('Finished with an error.');
+    $logger->error($message);
   }
   $messenger->addMessage($message);
 
@@ -50,15 +53,17 @@ function photoshelter_sync_photo(array $image, $parentId, $parentCas, &$context)
 
 function photoshelter_sync_photo_finished($success, $results, $operations) {
   $messenger = \Drupal::messenger();
-
+  $logger = \Drupal::logger('photoshelter');
   if ($success) {
     $message = \Drupal::translation()->formatPlural(
       count($results),
       '1 Synchronized photo', '@count Synchronized photos.'
     );
+    $logger->notice($message);
   }
   else {
     $message = t('Finished with an error.');
+    $logger->error($message);
   }
   $messenger->addMessage($message);
 

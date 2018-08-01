@@ -259,6 +259,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       'finished' => 'photoshelter_sync_finished',
       'file' => drupal_get_path('module', 'photoshelter'). '/photoshelter.batch.inc',
     );
+    if ($update) {
+      \Drupal::logger('photoshelter')->notice(t('Start photoshelter synchronization of new additions'));
+    } else {
+      \Drupal::logger('photoshelter')->notice(t('Start photoshelter synchronization of all data'));
+    }
 
     batch_set($batch);
   }
