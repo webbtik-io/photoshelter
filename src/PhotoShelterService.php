@@ -39,6 +39,13 @@ class PhotoshelterService {
   private $uid;
 
   /**
+   * Allow private files status.
+   *
+   * @var bool
+   */
+  private $allow_private;
+
+  /**
    * Options array for curl request.
    *
    * @var array
@@ -82,6 +89,7 @@ class PhotoshelterService {
     $email = $config->get('email');
     $password = $config->get('password');
     $this->api_key = $config->get('api_key');
+    $this->allow_private = $config->get('allow_private');
 
     $endpoint = '/psapi/v3/mem/authenticate';
     $base_url = 'https://www.photoshelter.com';
@@ -150,16 +158,6 @@ class PhotoshelterService {
     unset($gallery);
 
     $cas_required = $this->getPermission($galleryPermission);
-
-    // Check if modified time is after time
-    $galleryTime = DateTime::createFromFormat(
-      'Y-m-d H:i:s e', $galleryModified,
-      new DateTimeZone('GMT'));
-    if ($update) {
-      if ($galleryTime < $time) {
-        return;
-      }
-    }
 
     if (isset($galleryImageFile)) {
       $file = File::create(['uri' => $galleryImageFile]);
@@ -246,7 +244,15 @@ class PhotoshelterService {
       // Cycle through all images
       $operations = [];
       foreach ($images as $image) {
-        $operations[] = ['photoshelter_sync_photo', array($image, $parentId, $parentCas, $time, $update)];
+        if ($update) {
+          $imageUpdate   = $image['Image']['updated_at'];
+          // Check if modified time is after time
+          $imageTime = DateTime::createFromFormat('Y-m-d H:i:s e', $imageUpdate, new DateTimeZone('GMT'));
+          if ($imageTime < $time) {
+            continue;
+          }
+        }
+        $operations[] = ['photoshelter_sync_photo', array($image, $parentId, $parentCas)];
       }
 
       $batch = array(
@@ -268,16 +274,13 @@ class PhotoshelterService {
    * @param array $image
    * @param $parentId
    * @param $parentCas
-   * @param DateTime $time
-   * @param $update
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function getPhoto(array $image, $parentId, $parentCas, DateTime &$time, $update) {
+  public function getPhoto(array $image, $parentId, $parentCas) {
     // Skip if image isn't public
-    /*if ($image['f_visible'] === 'f') {
-      unset($image);
+    if ($image['f_visible'] === 'f' && $this->allow_private == FALSE) {
       return;
-    }*/
+    }
     $imageUpdate   = $image['Image']['updated_at'];
     $imageId       = $image['image_id'];
     $imageName     = $image['Image']['file_name'];
@@ -286,15 +289,6 @@ class PhotoshelterService {
     $imageCaption  = nl2br($image['Image']['Iptc']['caption']);
     $imageCredit   = $image['Image']['Iptc']['credit'];
     unset($image);
-
-    // Check if modified time is after time
-    $imageTime = DateTime::createFromFormat('Y-m-d H:i:s e',
-      $imageUpdate, new DateTimeZone('GMT'));
-    if ($update) {
-      if ($imageTime < $time) {
-        return;
-      }
-    }
 
     if (isset($imageLink)) {
       $file = File::create([

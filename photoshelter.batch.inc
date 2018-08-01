@@ -22,7 +22,7 @@ function photoshelter_sync_finished($success, $results, $operations) {
   if ($success) {
     $message = \Drupal::translation()->formatPlural(
       count($results),
-      'Synchronized gallery', '@count Synchronized galleries.'
+      '1 Synchronized gallery', '@count Synchronized galleries.'
     );
   }
   else {
@@ -32,13 +32,13 @@ function photoshelter_sync_finished($success, $results, $operations) {
 
 }
 
-function photoshelter_sync_photo(array $image, $parentId, $parentCas, DateTime $time, $update, &$context) {
+function photoshelter_sync_photo(array $image, $parentId, $parentCas, &$context) {
   if (!isset($context['service'])) {
     $context['service'] = \Drupal::service('photoshelter.photoshelter_service');
   }
 
   $service = $context['service'];
-  $service->getPhoto($image, $parentId, $parentCas,$time, $update);
+  $service->getPhoto($image, $parentId, $parentCas);
 
   $context['results'][] = $image['Image']['file_name'];
 
@@ -54,7 +54,7 @@ function photoshelter_sync_photo_finished($success, $results, $operations) {
   if ($success) {
     $message = \Drupal::translation()->formatPlural(
       count($results),
-      'Synchronized photo', '@count Synchronized photos.'
+      '1 Synchronized photo', '@count Synchronized photos.'
     );
   }
   else {

@@ -57,11 +57,17 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    */
   protected $token;
 
+  /**
+   * Allow private files status.
+   *
+   * @var bool
+   */
+  private $allow_private;
+
   private $api_key;
 
   private $options;
 
-  private $uid;
 
   /**
    * PhotoShelterConfigForm constructor.
@@ -90,7 +96,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $config           = $this->config('photoshelter.settings');
     $this->connection = $connection;
     $this->api_key    = urlencode($config->get('api_key'));
-    $this->uid        = $this->currentUser()->id();
+    $this->allow_private = $config->get('allow_private');
   }
 
   /**
@@ -136,7 +142,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#title'         => $this->t('Your PhotoShelter API key'),
       '#default_value' => $config->get('api_key'),
     ];
-    $form['sync_new']  = [
+    $form['allow_private'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Allow synchronization of private files'),
+      '#default_value' => $config->get('allow_private'),
+    ];
+    $form['sync_new'] = [
       '#type'  => 'submit',
       '#value' => t('Sync New Additions'),
     ];
@@ -151,32 +162,35 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $op = $form_state->getValue('op');
-    $service = \Drupal::service('photoshelter.photoshelter_service');
-    $this->token = $service->authenticate();
-    switch ($op) {
-      case 'Save configuration':
-        $this->submitForm($form, $form_state);
-        break;
-      case 'Sync All Data':
-        $this->sync_full_submit($form, $form_state);
-        break;
-      case 'Sync New Additions':
-        $this->sync_new_submit($form, $form_state, TRUE);
-        break;
-    }
+
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+
     $config = $this->config('photoshelter.settings');
     $config->set('email', $form_state->getValue('email'));
     $config->set('password', $form_state->getValue('password'));
     $config->set('api_key', $form_state->getValue('api_key'));
+    $config->set('allow_private', $form_state->getValue('allow_private'));
     $config->save();
-    parent::submitForm($form, $form_state);
+
+    $op = $form_state->getValue('op');
+    $service = \Drupal::service('photoshelter.photoshelter_service');
+    $this->token = $service->authenticate();
+
+    switch ($op) {
+      case 'Save configuration':
+        break;
+      case 'Sync All Data':
+        $this->sync_full_submit();
+        break;
+      case 'Sync New Additions':
+        $this->sync_new_submit(TRUE);
+        break;
+    }
   }
 
   /**
@@ -187,13 +201,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   }
 
   /**
-   * @param array $form
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *
    */
-  private function sync_full_submit(
-    array &$form,
-    FormStateInterface $form_state
-  ) {
+  private function sync_full_submit() {
     $config = $this->config('photoshelter.settings');
 
     $time = new DateTime(19700101);
@@ -203,17 +213,12 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // Update time saved in config
     $this->updateConfigPostSync($config, TRUE);
-    parent::submitForm($form, $form_state);
   }
 
   /**
    * @param bool $update
-   * @param array $form
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
-  private function sync_new_submit(
-    array &$form,
-    FormStateInterface $form_state, bool $update = FALSE
+  private function sync_new_submit(bool $update = FALSE
   ) {
     $config = $this->config('photoshelter.settings');
     $time   = $config->get('last_sync');
@@ -237,7 +242,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // Update time saved in config
     $this->updateConfigPostSync($config);
-    parent::submitForm($form, $form_state);
   }
 
   /**
@@ -249,8 +253,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $operations = [];
 
     $operations = array_merge($operations, $this->getCollections($time, $update));
-    $operations = array_merge($operations, $this->getGalleries($time, $update));
-
     $batch = array(
       'title' => t('galleries import'),
       'operations' => $operations,
@@ -287,10 +289,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     // Cycle through all collections
     $operations = [];
     foreach ($collections as $collection) {
-     /* if ($collection['f_list'] === 'f') {
+      if ($collection['f_list'] === 'f' && $this->allow_private == FALSE) {
         unset($collection);
         continue;
-      }*/
+      }
       $operations = array_merge($operations, $this->getOneCollection($collection, $time, $update));
       unset($collection);
     }
@@ -373,70 +375,75 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     // Check if modified time is after time
     $collectionTime = DateTime::createFromFormat('Y-m-d H:i:s e',
       $cModified, new DateTimeZone('GMT'));
-    if ($update) {
-      if ($collectionTime < $time) {
-        unset($collectionTime);
-        return;
+    if ($update && $collectionTime < $time) {
+
+    } else {
+      if ($cKeyImageFile !== NULL) {
+        $file = File::create(['uri' => $cKeyImageFile]);
+        $file->save();
       }
-    }
-    unset($collectionTime);
 
-    if ($cKeyImageFile !== NULL) {
-      $file = File::create(['uri' => $cKeyImageFile]);
-      $file->save();
+      // If already exist, update instead of create.
+      $collection_id = $this->collectionExists($collectionId);
+      if (!empty($collection_id)) {
+        $term = Term::load($collection_id);
+        $term->set('name', $collectionName);
+        $term->set('description', $cDescription);
+        $term->set('field_ps_permission', $cas_required);
+        $term->set('field_ps_parent_id', $parentId);
+        $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+        $term->set('field_ps_modified_at', $cModified);
+        $term->set('field_ps_key_image_id', $cKeyImage);
+        $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
+      }
+      else {
+        // Create term from $collection and $keyImageId
+        $term = Term::create([
+          'langcode'             => 'en',
+          'vid'                 => 'ps_collection',
+          'name'           => $collectionName,
+          'description'    => $cDescription,
+          'field_ps_permission'   => $cas_required,
+          'field_ps_id'             => $collectionId,
+          'field_ps_parent_id'      => $parentId,
+          'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
+          'field_ps_modified_at' => $cModified,
+          'field_ps_key_image_id'   => $cKeyImage,
+          'field_ps_key_image' => isset($file) ?
+            ['target_id' => $file->id()] : NULL,
+        ]);
+      }
+
+      try {
+        $term->save();
+      } catch (Exception $e) {
+        echo $e->getMessage();
+        exit(1);
+      }
+
+      if (isset($file)) {
+        unset($file);
+      }
+      unset($term);
     }
 
-    // If already exist, update instead of create.
-    $collection_id = $this->collectionExists($collectionId);
-    if (!empty($collection_id)) {
-      $term = Term::load($collection_id);
-      $term->set('name', $collectionName);
-      $term->set('description', $cDescription);
-      $term->set('field_ps_permission', $cas_required);
-      $term->set('field_ps_parent_id', $parentId);
-      $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
-      $term->set('field_ps_modified_at', $cModified);
-      $term->set('field_ps_key_image_id', $cKeyImage);
-      $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
-    }
-    else {
-      // Create term from $collection and $keyImageId
-      $term = Term::create([
-        'langcode'             => 'en',
-        'vid'                 => 'ps_collection',
-        'name'           => $collectionName,
-        'description'    => $cDescription,
-        'field_ps_permission'   => $cas_required,
-        'field_ps_id'             => $collectionId,
-        'field_ps_parent_id'      => $parentId,
-        'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
-        'field_ps_modified_at' => $cModified,
-        'field_ps_key_image_id'   => $cKeyImage,
-        'field_ps_key_image' => isset($file) ?
-          ['target_id' => $file->id()] : NULL,
-      ]);
-    }
-
-    try {
-      $term->save();
-    } catch (Exception $e) {
-      echo $e->getMessage();
-      exit(1);
-    }
-
-    if (isset($file)) {
-      unset($file);
-    }
-    unset($term);
-
+    $operations = [];
     // Create nodes for children
     if (isset($cChildren)) {
-      $operations = [];
       foreach ($cChildren as $child) {
         switch (key($cChildren)) {
           case 'Gallery':
             foreach ($child as $gallery) {
-              $operations[] = ['photoshelter_sync_gallery', array($gallery, $time, $update, NULL)];
+              if ($update) {
+                $galleryModified = $gallery['modified_at'];
+                // Check if modified time is after time
+                $galleryTime = DateTime::createFromFormat('Y-m-d H:i:s e', $galleryModified, new DateTimeZone('GMT'));
+                if ($galleryTime < $time) {
+                  unset($gallery);
+                  continue;
+                }
+              }
+              $operations[] = ['photoshelter_sync_gallery', array($gallery, $time, $update, $collectionId)];
               unset($gallery);
             }
             break;
@@ -452,40 +459,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         unset($child);
         next($cChildren);
       }
-      return $operations;
     }
-  }
-
-  private function getGalleries(DateTime &$time, bool $update) {
-    // Get list of galleries
-    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery?api_key=$this->api_key&auth_token=$this->token&fields=gallery_id,name,description,f_list,modified_at&extend={%22Parents%22:{%22fields%22:%22collection_id%22,%22params%22:{}},%22KeyImage%22:{%22fields%22:%22image_id%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Visibility%22:{%22fields%22:%22mode%22,%22params%22:{}}}");
-    curl_setopt_array($curl, $this->options);
-    $response = curl_exec($curl);
-    $err      = curl_error($curl);
-    curl_close($curl);
-    if ($err) {
-      echo "cURL Error #:" . $err;
-      exit(1);
-    }
-    $response  = json_decode($response, TRUE);
-    $galleries = $response['data']['Gallery'];
-    unset($response);
-
-    $operations = [];
-    foreach ($galleries as $gallery) {
-      /*if ($gallery['f_list'] === 'f') {
-        unset($gallery);
-        continue;
-      }*/
-      if (!isset($galleryParent)) {
-        $operations[] = ['photoshelter_sync_gallery', array($gallery, $time, $update, NULL)];
-        unset($gallery);
-      }
-    }
-
-    unset($galleryParent);
-    unset($galleries);
-
     return $operations;
   }
 
