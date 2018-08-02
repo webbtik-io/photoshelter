@@ -113,6 +113,24 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#title' => $this->t('Set a daily automatic synchronization'),
       '#default_value' => $config->get('cron_sync'),
     ];
+    $form['max_width'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Maximum width'),
+      '#description' => $this->t('Choose the maximum width for the photos in pixels, (ie: 700)'),
+      '#required' => TRUE,
+      '#min' => 100,
+      '#size' => 4,
+      '#default_value' => $config->get('max_width'),
+    ];
+    $form['max_height'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Maximum height'),
+      '#description' => $this->t('Choose the maximum height for the photos in pixels, (ie: 700)'),
+      '#required' => TRUE,
+      '#min' => 100,
+      '#size' => 4,
+      '#default_value' => $config->get('max_height'),
+    ];
     $form['sync_new'] = [
       '#type'  => 'submit',
       '#value' => t('Sync New Additions'),
@@ -144,6 +162,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $config->set('api_key', $form_state->getValue('api_key'));
     $config->set('allow_private', $form_state->getValue('allow_private'));
     $config->set('cron_sync', $form_state->getValue('cron_sync'));
+    $config->set('max_width', $form_state->getValue('max_width'));
+    $config->set('max_height', $form_state->getValue('max_height'));
     $config->save();
 
     $op = $form_state->getValue('op');

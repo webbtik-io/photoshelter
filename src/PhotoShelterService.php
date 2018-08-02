@@ -47,6 +47,13 @@ class PhotoshelterService {
   private $allow_private;
 
   /**
+   * Maximum dimensions for images.
+   *
+   * @var int
+   */
+  private $max_dim;
+
+  /**
    * Options array for curl request.
    *
    * @var array
@@ -91,6 +98,7 @@ class PhotoshelterService {
     $password = $config->get('password');
     $this->api_key = $config->get('api_key');
     $this->allow_private = $config->get('allow_private');
+    $this->max_dim = $config->get('max_width') . 'x' . $config->get('max_height');
 
     $endpoint = '/psapi/v3/mem/authenticate';
     $base_url = 'https://www.photoshelter.com';
@@ -213,7 +221,7 @@ class PhotoshelterService {
    */
   private function getCollections(DateTime &$time, $update, $process) {
     // Get collection and gallery data
-    $curl    = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection?fields=collection_id,name,description,f_list,modified_at&api_key=$this->api_key&auth_token=$this->token&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
+    $curl    = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection?fields=collection_id,name,description,f_list,modified_at&api_key=$this->api_key&auth_token=$this->token&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link%22,%22params%22:{%22image_size%22:%22$this->max_dim%22,%22f_https_link%22:%22t%22}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
     curl_setopt_array($curl, $this->options);
 
     $response = curl_exec($curl);
@@ -276,7 +284,7 @@ class PhotoshelterService {
 
   private function curlOneCollection($collectionId, DateTime &$time, $update, $parentId = NULL, $process) {
 
-    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection/$collectionId?api_key=$this->api_key&auth_token=$this->token&fields=collection_id,name,description,f_list,mode,modified_at&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
+    $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/collection/$collectionId?api_key=$this->api_key&auth_token=$this->token&fields=collection_id,name,description,f_list,mode,modified_at&extend={%22Permission%22:{%22fields%22:%22mode%22,%22params%22:{}},%22KeyImage%22:%20{%22fields%22:%22image_id,gallery_id%22,%22params%22:{}},%22Visibility%22:%20{%22fields%22:%22mode%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link%22,%22params%22:{%22image_size%22:%22$this->max_dim%22,%22f_https_link%22:%22t%22}},%22Children%22:{%22Gallery%22:{%22fields%22:%22gallery_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}},%22Collection%22:{%22fields%22:%22collection_id,name,description,f_list,modified_at,access_inherit%22,%22params%22:{}}}}");
     curl_setopt_array($curl, $this->options);
 
     $response = curl_exec($curl);
@@ -513,7 +521,7 @@ class PhotoshelterService {
     }
     do {
       // Get list of images in gallery
-      $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery/$parentId/images?fields=image_id,f_visible&api_key=$this->api_key&auth_token=$this->token&per_page=750&page=$page&extend={%22Image%22:{%22fields%22:%22image_id,file_name,updated_at%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{%22image_size%22:%22x700%22,%22f_https_link%22:%22t%22}},%22Iptc%22:{%22fields%22:%22keyword,credit,caption%22,%22params%22:{}}}");
+      $curl = curl_init("https://www.photoshelter.com/psapi/v3/mem/gallery/$parentId/images?fields=image_id,f_visible&api_key=$this->api_key&auth_token=$this->token&per_page=750&page=$page&extend={%22Image%22:{%22fields%22:%22image_id,file_name,updated_at%22,%22params%22:{}},%22ImageLink%22:{%22fields%22:%22link,auth_link%22,%22params%22:{%22image_size%22:%22$this->max_dim%22,%22f_https_link%22:%22t%22}},%22Iptc%22:{%22fields%22:%22keyword,credit,caption%22,%22params%22:{}}}");
       curl_setopt_array($curl, $this->options);
       $response = curl_exec($curl);
       $err      = curl_error($curl);
