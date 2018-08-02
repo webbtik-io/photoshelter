@@ -132,9 +132,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#default_value' => $config->get('email'),
     ];
     $form['password']  = [
-      '#type'          => 'textfield',
-      '#title'         =>
-        $this->t('Your PhotoShelter account password.'),
+      '#type'          => 'password',
+      '#title'         => $this->t('Your PhotoShelter account password.'),
+      '#description'   => $this->t('You can leave this field empty if it has been set before'),
       '#default_value' => $config->get('password'),
     ];
     $form['api_key']   = [
@@ -172,7 +172,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     $config = $this->config('photoshelter.settings');
     $config->set('email', $form_state->getValue('email'));
-    $config->set('password', $form_state->getValue('password'));
+    if(!empty($form_state->getValue('password'))) {
+      $config->set('password', $form_state->getValue('password'));
+    }
     $config->set('api_key', $form_state->getValue('api_key'));
     $config->set('allow_private', $form_state->getValue('allow_private'));
     $config->save();

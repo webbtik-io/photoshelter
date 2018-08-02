@@ -112,30 +112,30 @@ class PhotoshelterService {
       $jsonResponse = json_decode($response, TRUE);
       if ($jsonResponse['status'] != 'ok') {
         $this->messenger->addError(t('Invalid credentials'));
-      }
-      $this->token = $jsonResponse['data']['token'];
-      if (isset($jsonResponse['data']['org'][0]['id']) && !empty($jsonResponse['data']['org'][0]['id'])) {
-        $org_id = $jsonResponse['data']['org'][0]['id'];
-        $endpoint = '/psapi/v3/mem/organization/' . $org_id . '/authenticate';
-        $fullUrl  = $base_url . $endpoint .
-          '?api_key=' . $this->api_key .
-          '&auth_token=' . $this->token;
-        $ch = curl_init($fullUrl);
-        curl_setopt_array($ch, $this->options);
-        $response = curl_exec($ch);
-        $jsonResponse = json_decode($response, TRUE);
-        if ($jsonResponse['status'] != 'ok') {
-          $this->messenger->addError(t('error when authenticate as an organization'));
+      } else {
+        $this->token = $jsonResponse['data']['token'];
+        if (isset($jsonResponse['data']['org'][0]['id']) && !empty($jsonResponse['data']['org'][0]['id'])) {
+          $org_id = $jsonResponse['data']['org'][0]['id'];
+          $endpoint = '/psapi/v3/mem/organization/' . $org_id . '/authenticate';
+          $fullUrl  = $base_url . $endpoint .
+            '?api_key=' . $this->api_key .
+            '&auth_token=' . $this->token;
+          $ch = curl_init($fullUrl);
+          curl_setopt_array($ch, $this->options);
+          $response = curl_exec($ch);
+          $jsonResponse = json_decode($response, TRUE);
+          if ($jsonResponse['status'] != 'ok') {
+            $this->messenger->addError(t('error when authenticate as an organization'));
+          }
+          curl_close($ch);
+          $this->messenger->addMessage(t('The authentication as an organization is successfull'));
         }
-        curl_close($ch);
-        $this->messenger->addMessage(t('The authentication as an organization is successfull'));
+        else {
+          $this->messenger->addMessage(t('The authentication is successfull'));
+        }
       }
-      else {
-        $this->messenger->addMessage(t('The authentication is successfull'));
-      }
-
-      return $this->token;
     }
+    return $this->token;
   }
 
 
@@ -252,7 +252,7 @@ class PhotoshelterService {
             continue;
           }
         }
-        $operations[] = ['photoshelter_sync_photo', array($image, $parentId, $parentCas)];
+        $operations[] = ['photoshelter_sync_photo', array($image, $parentCas)];
       }
 
       $batch = array(
@@ -276,7 +276,7 @@ class PhotoshelterService {
    * @param $parentCas
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function getPhoto(array $image, $parentId, $parentCas) {
+  public function getPhoto(array $image, $parentCas) {
     // Skip if image isn't public
     if ($image['f_visible'] === 'f' && $this->allow_private == FALSE) {
       return;
@@ -288,6 +288,7 @@ class PhotoshelterService {
     $imageLink     = $image['ImageLink']['link'];
     $imageCaption  = nl2br($image['Image']['Iptc']['caption']);
     $imageCredit   = $image['Image']['Iptc']['credit'];
+    $parentId      = $image['Image']['gallery_id'];
     unset($image);
 
     if (isset($imageLink)) {

@@ -35,13 +35,13 @@ function photoshelter_sync_finished($success, $results, $operations) {
 
 }
 
-function photoshelter_sync_photo(array $image, $parentId, $parentCas, &$context) {
+function photoshelter_sync_photo(array $image, $parentCas, &$context) {
   if (!isset($context['service'])) {
     $context['service'] = \Drupal::service('photoshelter.photoshelter_service');
   }
 
   $service = $context['service'];
-  $service->getPhoto($image, $parentId, $parentCas);
+  $service->getPhoto($image, $parentCas);
 
   $context['results'][] = $image['Image']['file_name'];
 
