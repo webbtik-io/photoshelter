@@ -6,7 +6,7 @@ function photoshelter_sync_gallery(array $gallery, DateTime $time, $update, $par
   }
 
   $service = $context['service'];
-  $service->getGallery($gallery, $time, $update, $parentId);
+  $service->getGallery($gallery, $time, $update, $parentId, 'batch');
 
   $context['results'][] = $gallery['name'];
 
