@@ -1,14 +1,8 @@
 name: PhotoShelter API
 description: 'Consumes the PhotoShelter API'
 package: Media
-
 type: module
-core: 8.x
-
 php: 7.0
-
-version: 2.0-dev
-
 dependencies:
   - media
   - remote_stream_wrapper
