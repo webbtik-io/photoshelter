@@ -444,10 +444,10 @@ class PhotoshelterService {
     $collection   = $jsonResponse['data']['Collection'];
     $operations = [];
     if ($process == 'batch') {
-      $operations = $this->saveOneCollection($collection, $time, $update, $collection['mode'], $parentId, 'batch');
+      $operations = $this->saveOneCollection($collection, $time, $update, $collection['Visibility']['mode'], $parentId, 'batch');
     }
     elseif ($process == 'queue') {
-      $operations = $this->saveOneCollection($collection, $time, $update, $collection['mode'], $parentId, 'queue');
+      $operations = $this->saveOneCollection($collection, $time, $update, $collection['Visibility']['mode'], $parentId, 'queue');
     }
 
     return $operations;
