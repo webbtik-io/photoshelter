@@ -1,83 +1,31 @@
 <?php
 
-/**
- * Copyright 2018 Inovae Sarl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @file
- * Contains Drupal\photoshelter\Form\PhotoShelterConfigForm
- */
-
 namespace Drupal\photoshelter\Form;
 
 use DateTime;
 use DateTimeZone;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Exception;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class PhotoShelterConfigForm
+ * Class PhotoShelterConfigForm.
  *
  * @package Drupal\photoshelter\Form
  */
 class PhotoShelterConfigForm extends ConfigFormBase {
 
   /**
-   * @var \Drupal\Core\Database\Connection
-   */
-  protected $connection;
-
-  protected $user;
-
-  protected $PS_service;
-
-  /**
-   * PhotoShelterConfigForm constructor.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   * @param \Drupal\Core\Database\Connection $connection
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, Connection $connection) {
-    parent::__construct($config_factory);
-    $this->connection = $connection;
-    $this->PS_service = \Drupal::service('photoshelter.photoshelter_service');
-  }
-
-  /**
-   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-   *
-   * @return static
-   */
-  public static function create(ContainerInterface $container) {
-    /** @noinspection PhpParamsInspection */
-    return new static(
-      $container->get('config.factory'),
-      $container->get('database')
-    );
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function getFormId() {
     return 'photoshelter_config_form';
+  }
+
+  /**
+   * {@inheritdoc}.
+   */
+  protected function getEditableConfigNames() {
+    return ['photoshelter.settings'];
   }
 
   /**
@@ -88,8 +36,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $config            = $this->config('photoshelter.settings');
     $form['email']     = [
       '#type'          => 'email',
-      '#title'         =>
-        $this->t('The email associated with your PhotoShelter account.'),
+      '#title'         => $this->t('The email associated with your PhotoShelter account.'),
       '#default_value' => $config->get('email'),
     ];
     $form['password']  = [
@@ -131,14 +78,32 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#size' => 4,
       '#default_value' => $config->get('max_height'),
     ];
-    $form['sync_new'] = [
-      '#type'  => 'submit',
-      '#value' => t('Sync New Additions'),
+    $form['get_collection'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Get collections names'),
+      '#submit' => ['::getCollectionsNames'],
     ];
-    $form['sync_full'] = [
-      '#type'  => 'submit',
-      '#value' => 'Sync All Data',
-    ];
+    $collection_names = $config->get('collections_names');
+    if (isset($collection_names) && !empty($collection_names)) {
+      $form['collections'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Collections'),
+        '#options' => $collection_names,
+        '#description' => $this->t('Choose collections to synchronize'),
+        '#required' => TRUE,
+        '#default_value' => $config->get('collections'),
+      ];
+      $form['sync_new'] = [
+        '#type'  => 'submit',
+        '#value' => t('Sync New Additions'),
+        '#submit' => ['::syncNewSubmit'],
+      ];
+      $form['sync_full'] = [
+        '#type'  => 'submit',
+        '#value' => 'Sync All Data',
+        '#submit' => ['::syncFullSubmit'],
+      ];
+    }
     return $form;
   }
 
@@ -153,10 +118,92 @@ class PhotoShelterConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $this->saveConfig($form_state);
+    $ps_service = \Drupal::service('photoshelter.photoshelter_service');
+    $ps_service->authenticate();
+  }
 
+  /**
+   * Synchronize all the selected collections.
+   *
+   * @param array $form
+   *   The form array.
+   * @param FormStateInterface $form_state
+   *   The form state object.
+   */
+  public function syncFullSubmit(array &$form, FormStateInterface $form_state) {
+    $config = $this->saveConfig($form_state);
+
+    $time = new DateTime(19700101);
+
+    $ps_service = \Drupal::service('photoshelter.photoshelter_service');
+
+    // Get the data.
+    $ps_service->getData($time);
+
+    // Update time saved in config.
+    $ps_service->updateConfigPostSync($config, TRUE);
+  }
+
+  /**
+   * Synchronize newly added galleries and images in the selected collections.
+   *
+   * @param array $form
+   *   The form array.
+   * @param FormStateInterface $form_state
+   *   The form state object.
+   */
+  public function syncNewSubmit(array &$form, FormStateInterface $form_state) {
+    $config = $this->saveConfig($form_state);
+    $time   = $config->get('last_sync');
+
+    // Get the date.
+    if ($time === 'Never') {
+      $time = new DateTime(NULL, new DateTimeZone('GMT'));
+    }
+    else {
+      $time = DateTime::createFromFormat(DateTime::RFC850, $time,
+        new DateTimeZone('GMT'));
+    }
+
+    $ps_service = \Drupal::service('photoshelter.photoshelter_service');
+
+    // Get the data.
+    $ps_service->getData($time, TRUE);
+
+    // Update time saved in config.
+    $ps_service->updateConfigPostSync($config);
+  }
+
+  /**
+   * Retrieve the Photoshelter collections and save them to the configuration.
+   *
+   * @param array $form
+   *   The form array.
+   * @param FormStateInterface $form_state
+   *   The form state object.
+   */
+  public function getCollectionsNames(array &$form, FormStateInterface $form_state) {
+    $config = $this->saveConfig($form_state);
+    $ps_service = \Drupal::service('photoshelter.photoshelter_service');
+    $collections_names = $ps_service->getCollectionsNames();
+    $config->set('collections_names', $collections_names);
+    $config->save();
+  }
+
+  /**
+   * Save the configuration.
+   *
+   * @param FormStateInterface $form_state
+   *   The form state object.
+   *
+   * @return \Drupal\Core\Config\Config|\Drupal\Core\Config\ImmutableConfig
+   *   The configuration object.
+   */
+  private function saveConfig(FormStateInterface $form_state) {
     $config = $this->config('photoshelter.settings');
     $config->set('email', $form_state->getValue('email'));
-    if(!empty($form_state->getValue('password'))) {
+    if (!empty($form_state->getValue('password'))) {
       $config->set('password', $form_state->getValue('password'));
     }
     $config->set('api_key', $form_state->getValue('api_key'));
@@ -164,71 +211,10 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $config->set('cron_sync', $form_state->getValue('cron_sync'));
     $config->set('max_width', $form_state->getValue('max_width'));
     $config->set('max_height', $form_state->getValue('max_height'));
+    $config->set('collections', $form_state->getValue('collections'));
     $config->save();
 
-    $op = $form_state->getValue('op');
-    $this->token = $this->PS_service->authenticate();
-
-    switch ($op) {
-      case 'Save configuration':
-        break;
-      case 'Sync All Data':
-        $this->sync_full_submit();
-        break;
-      case 'Sync New Additions':
-        $this->sync_new_submit(TRUE);
-        break;
-    }
-  }
-
-  /**
-   * {@inheritdoc}.
-   */
-  protected function getEditableConfigNames() {
-    return ['photoshelter.settings'];
-  }
-
-  /**
-   *
-   */
-  private function sync_full_submit() {
-    $config = $this->config('photoshelter.settings');
-
-    $time = new DateTime(19700101);
-
-    //Get the data
-    $this->PS_service->getData($time);
-
-    // Update time saved in config
-    $this->PS_service->updateConfigPostSync($config, TRUE);
-  }
-
-  /**
-   * @param bool $update
-   */
-  private function sync_new_submit($update = FALSE) {
-    $config = $this->config('photoshelter.settings');
-    $time   = $config->get('last_sync');
-
-    // Get the date
-    if ($time === 'Never') {
-      try {
-        $time = new DateTime(NULL, new DateTimeZone('GMT'));
-      } catch (Exception $e) {
-        echo $e->getMessage();
-        exit(1);
-      }
-    }
-    else {
-      $time = DateTime::createFromFormat(DateTime::RFC850, $time,
-        new DateTimeZone('GMT'));
-    }
-
-    //Get the data
-    $this->PS_service->getData($time, $update);
-
-    // Update time saved in config
-    $this->PS_service->updateConfigPostSync($config);
+    return $config;
   }
 
 }

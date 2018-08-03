@@ -1,9 +1,14 @@
 <?php
 
 /**
+ * @file
+ * Contains hook cron to set automatic synchronization.
+ */
+
+/**
  * Implements hook_cron().
  */
 function photoshelter_cron() {
   $service = \Drupal::service('photoshelter.photoshelter_service');
-  $service->QueueSyncNew();
+  $service->queueSyncNew();
 }

@@ -1,15 +1,11 @@
 <?php
-/**
- * @file
- * Contains Drupal\photoshelter\Plugin\QueueWorker\PhotoShelterSyncNewPhoto
- */
 
 namespace Drupal\photoshelter\Plugin\QueueWorker;
 
 use Drupal\Core\Queue\QueueWorkerBase;
 
 /**
- * Process synchronization of new additions in photoshelter
+ * Process synchronization of new additions in photoshelter.
  *
  * @QueueWorker(
  *   id = "photoshelter_syncnew_photo",
@@ -17,16 +13,15 @@ use Drupal\Core\Queue\QueueWorkerBase;
  *   cron = {"time" = 90}
  * )
  */
-
-class PhotoShelterSyncNewPhoto extends QueueWorkerBase
-{
+class PhotoShelterSyncNewPhoto extends QueueWorkerBase {
 
   /**
    * {@inheritdoc}
    */
   public function processItem($data) {
-    \Drupal::logger('photoshelter')->notice(t('synchronization of photo '. $data['image']['Image']['file_name']));
+    \Drupal::logger('photoshelter')->notice(t('synchronization of photo') . ' ' . $data['image']['Image']['file_name']);
     $service = \Drupal::service('photoshelter.photoshelter_service');
-    $service->getPhoto($data['image'], $data['parentCas']);
+    $service->getPhoto($data['image'], $data['$parentVisibility']);
   }
+
 }

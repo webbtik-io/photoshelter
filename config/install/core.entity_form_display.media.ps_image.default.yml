@@ -4,6 +4,7 @@ dependencies:
   config:
   - field.field.media.ps_image.field_media_image
   - field.field.media.ps_image.field_ps_caption
+  - field.field.media.ps_image.field_ps_copyright
   - field.field.media.ps_image.field_ps_credit
   - field.field.media.ps_image.field_ps_id
   - field.field.media.ps_image.field_ps_modified_at
@@ -26,7 +27,7 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 11
+    weight: 12
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -46,6 +47,14 @@ content:
     third_party_settings: {  }
     type: string_textarea
     region: content
+  field_ps_copyright:
+    weight: 4
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
   field_ps_credit:
     weight: 3
     settings:
@@ -55,7 +64,7 @@ content:
     type: string_textfield
     region: content
   field_ps_id:
-    weight: 4
+    weight: 5
     settings:
       size: 60
       placeholder: ''
@@ -63,7 +72,7 @@ content:
     type: string_textfield
     region: content
   field_ps_modified_at:
-    weight: 9
+    weight: 10
     settings:
       size: 60
       placeholder: ''
@@ -71,7 +80,7 @@ content:
     type: string_textfield
     region: content
   field_ps_parent_gallery:
-    weight: 6
+    weight: 7
     settings:
       match_operator: CONTAINS
       size: 60
@@ -80,7 +89,7 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_ps_parent_id:
-    weight: 5
+    weight: 6
     settings:
       size: 60
       placeholder: ''
@@ -88,7 +97,7 @@ content:
     type: string_textfield
     region: content
   field_ps_permission:
-    weight: 8
+    weight: 9
     settings:
       size: 60
       placeholder: ''
@@ -96,7 +105,7 @@ content:
     type: string_textfield
     region: content
   field_ps_tags:
-    weight: 7
+    weight: 8
     settings:
       match_operator: CONTAINS
       size: 60
@@ -114,7 +123,7 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 12
+    weight: 13
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -122,12 +131,12 @@ content:
     type: boolean_checkbox
     settings:
       display_label: true
-    weight: 13
+    weight: 14
     region: content
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete
-    weight: 10
+    weight: 11
     settings:
       match_operator: CONTAINS
       size: 60
