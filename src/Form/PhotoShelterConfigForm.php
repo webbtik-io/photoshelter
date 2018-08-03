@@ -78,21 +78,18 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#size' => 4,
       '#default_value' => $config->get('max_height'),
     ];
-    $form['get_collection'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Get collections names'),
-      '#submit' => ['::getCollectionsNames'],
-    ];
     $collection_names = $config->get('collections_names');
+    $collection_values = $config->get('collections');
     if (isset($collection_names) && !empty($collection_names)) {
       $form['collections'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Collections'),
         '#options' => $collection_names,
         '#description' => $this->t('Choose collections to synchronize'),
-        '#required' => TRUE,
-        '#default_value' => $config->get('collections'),
       ];
+      if (!empty($collection_values)) {
+        $form['collections']['#default_value'] = $collection_values;
+      }
       $form['sync_new'] = [
         '#type'  => 'submit',
         '#value' => t('Sync New Additions'),
@@ -104,6 +101,11 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         '#submit' => ['::syncFullSubmit'],
       ];
     }
+    $form['get_collection'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Get collections names'),
+      '#submit' => ['::getCollectionsNames'],
+    ];
     return $form;
   }
 

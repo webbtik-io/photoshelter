@@ -185,29 +185,31 @@ class PhotoshelterService {
    */
   public function getCollectionsNames() {
     // Get collection and gallery data.
-    $endpoint = 'collection';
-    $fullUrl  = $this->baseUrl . $endpoint .
-      '?api_key=' . $this->apiKey .
-      '&auth_token=' . $this->token .
-      '&fields=collection_id,name';
-
-    $curl    = curl_init($fullUrl);
-    curl_setopt_array($curl, $this->curlOptions);
-
-    $response = curl_exec($curl);
-    $err      = curl_error($curl);
-
-    curl_close($curl);
-
-    if ($err) {
-      echo "cURL Error #:" . $err;
-      exit(1);
-    }
-    $response    = json_decode($response, TRUE);
-    $collections = $response['data']['Collection'];
     $collections_array = [];
-    foreach ($collections as $collection) {
-      $collections_array[$collection['collection_id']] = $collection['name'];
+    if (!empty($this->token)) {
+      $endpoint = 'collection';
+      $fullUrl  = $this->baseUrl . $endpoint .
+        '?api_key=' . $this->apiKey .
+        '&auth_token=' . $this->token .
+        '&fields=collection_id,name';
+
+      $curl    = curl_init($fullUrl);
+      curl_setopt_array($curl, $this->curlOptions);
+
+      $response = curl_exec($curl);
+      $err      = curl_error($curl);
+
+      curl_close($curl);
+
+      if ($err) {
+        echo "cURL Error #:" . $err;
+        exit(1);
+      }
+      $response    = json_decode($response, TRUE);
+      $collections = $response['data']['Collection'];
+      foreach ($collections as $collection) {
+        $collections_array[$collection['collection_id']] = $collection['name'];
+      }
     }
     return $collections_array;
   }
