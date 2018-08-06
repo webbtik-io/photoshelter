@@ -814,7 +814,6 @@ class PhotoshelterService {
     $imageCopyright = $image['Image']['Iptc']['copyright'];
     $parentId      = $image['Image']['gallery_id'];
     unset($image);
-    \Drupal::logger('photoshelter')->notice($imageCopyright);
     if (isset($imageLink)) {
       $file = File::create([
         'uri' => $imageLink,
