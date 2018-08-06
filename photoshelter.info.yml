@@ -7,5 +7,5 @@ type: module
 core: 8.x
 
 dependencies:
-  - media
-  - remote_stream_wrapper
+  - drupal:media
+  - remote_stream_wrapper:remote_stream_wrapper
