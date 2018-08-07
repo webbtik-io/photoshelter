@@ -8,7 +8,7 @@ dependencies:
   - field.field.media.ps_image.field_ps_credit
   - field.field.media.ps_image.field_ps_id
   - field.field.media.ps_image.field_ps_modified_at
-  - field.field.media.ps_image.field_ps_parent_gallery
+  - field.field.media.ps_image.field_ps_parent_container
   - field.field.media.ps_image.field_ps_parent_id
   - field.field.media.ps_image.field_ps_permission
   - field.field.media.ps_image.field_ps_tags
@@ -63,7 +63,7 @@ content:
     third_party_settings: {  }
     type: string
     region: content
-  field_ps_parent_gallery:
+  field_ps_parent_container:
     weight: 7
     label: above
     settings:

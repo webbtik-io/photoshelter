@@ -5,13 +5,13 @@ dependencies:
     module:
       - photoshelter
   config:
-    - field.storage.taxonomy_term.field_ps_key_image_id
-    - taxonomy.vocabulary.ps_gallery
-id: taxonomy_term.ps_gallery.field_ps_key_image_id
-field_name: field_ps_key_image_id
+    - field.storage.taxonomy_term.field_ps_parent_id
+    - taxonomy.vocabulary.ps_container
+id: taxonomy_term.ps_container.field_ps_parent_id
+field_name: field_ps_parent_id
 entity_type: taxonomy_term
-bundle: ps_gallery
-label: 'Key image id'
+bundle: ps_container
+label: 'Parent ID'
 description: ''
 required: false
 translatable: false

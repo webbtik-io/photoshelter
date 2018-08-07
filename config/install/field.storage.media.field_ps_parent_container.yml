@@ -7,8 +7,8 @@ dependencies:
   module:
     - media
     - taxonomy
-id: media.field_ps_parent_gallery
-field_name: field_ps_parent_gallery
+id: media.field_ps_parent_container
+field_name: field_ps_parent_container
 entity_type: media
 type: entity_reference
 settings:

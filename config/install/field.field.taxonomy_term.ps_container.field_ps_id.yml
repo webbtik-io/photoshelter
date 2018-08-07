@@ -6,11 +6,11 @@ dependencies:
       - photoshelter
   config:
     - field.storage.taxonomy_term.field_ps_id
-    - taxonomy.vocabulary.ps_gallery
-id: taxonomy_term.ps_gallery.field_ps_id
+    - taxonomy.vocabulary.ps_container
+id: taxonomy_term.ps_container.field_ps_id
 field_name: field_ps_id
 entity_type: taxonomy_term
-bundle: ps_gallery
+bundle: ps_container
 label: 'PS ID'
 description: 'Photoshelter id'
 required: true

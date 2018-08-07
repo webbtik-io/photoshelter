@@ -4,8 +4,8 @@ dependencies:
   enforced:
     module:
       - photoshelter
-name: 'PS Collection'
-vid: ps_collection
-description: 'photoshelter collection'
+name: 'PS Container'
+vid: ps_container
+description: 'photoshelter container'
 hierarchy: 0
 weight: 0

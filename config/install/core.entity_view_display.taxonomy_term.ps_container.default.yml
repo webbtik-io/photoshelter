@@ -2,34 +2,41 @@ langcode: en
 status: true
 dependencies:
   config:
-  - field.field.taxonomy_term.ps_gallery.field_ps_id
-  - field.field.taxonomy_term.ps_gallery.field_ps_key_image
-  - field.field.taxonomy_term.ps_gallery.field_ps_key_image_id
-  - field.field.taxonomy_term.ps_gallery.field_ps_modified_at
-  - field.field.taxonomy_term.ps_gallery.field_ps_parent_collection
-  - field.field.taxonomy_term.ps_gallery.field_ps_parent_id
-  - field.field.taxonomy_term.ps_gallery.field_ps_permission
-  - taxonomy.vocabulary.ps_gallery
+  - field.field.taxonomy_term.ps_container.field_ps_container_type
+  - field.field.taxonomy_term.ps_container.field_ps_id
+  - field.field.taxonomy_term.ps_container.field_ps_key_image
+  - field.field.taxonomy_term.ps_container.field_ps_key_image_id
+  - field.field.taxonomy_term.ps_container.field_ps_modified_at
+  - field.field.taxonomy_term.ps_container.field_ps_parent_id
+  - field.field.taxonomy_term.ps_container.field_ps_permission
+  - taxonomy.vocabulary.ps_container
   enforced:
     module:
     - photoshelter
   module:
   - image
   - text
-id: taxonomy_term.ps_gallery.default
+id: taxonomy_term.ps_container.default
 targetEntityType: taxonomy_term
-bundle: ps_gallery
+bundle: ps_container
 mode: default
 content:
   description:
     label: hidden
     type: text_default
-    weight: 7
+    weight: 0
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_ps_container_type:
+    weight: 3
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
   field_ps_id:
-    weight: 0
+    weight: 1
     label: above
     settings:
       link_to_entity: false
@@ -37,7 +44,7 @@ content:
     type: string
     region: content
   field_ps_key_image:
-    weight: 6
+    weight: 7
     label: above
     settings:
       image_style: ''
@@ -46,7 +53,7 @@ content:
     type: image
     region: content
   field_ps_key_image_id:
-    weight: 5
+    weight: 6
     label: above
     settings:
       link_to_entity: false
@@ -54,23 +61,15 @@ content:
     type: string
     region: content
   field_ps_modified_at:
-    weight: 3
+    weight: 4
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
     region: content
-  field_ps_parent_collection:
-    weight: 2
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: content
   field_ps_parent_id:
-    weight: 1
+    weight: 2
     label: above
     settings:
       link_to_entity: false
@@ -78,7 +77,7 @@ content:
     type: string
     region: content
   field_ps_permission:
-    weight: 4
+    weight: 5
     label: above
     settings:
       link_to_entity: false
