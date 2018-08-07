@@ -44,7 +44,14 @@ class PhotoshelterService {
    *
    * @var array
    */
-  protected $collections;
+  protected $rootCollections;
+
+  /**
+   * Photoshelter galleries array.
+   *
+   * @var array
+   */
+  protected $rootGalleries;
 
   /**
    * Photoshelter credentials array.
@@ -118,7 +125,8 @@ class PhotoshelterService {
     $this->apiKey = $config->get('api_key');
     $this->allowPrivate = $config->get('allow_private');
     $this->maxDim = $config->get('max_width') . 'x' . $config->get('max_height');
-    $this->collections = $config->get('collections');
+    $this->rootCollections = $config->get('collections');
+    $this->rootGalleries = $config->get('galleries');
     $this->authenticate();
   }
 
@@ -178,20 +186,19 @@ class PhotoshelterService {
   }
 
   /**
-   * Retrieve Photoshelter collections names and id.
+   * Retrieve Photoshelter root containers names and id.
    *
    * @return array
-   *   Collection array with collection ids and names.
+   *   Container array with ids and names and type.
    */
-  public function getCollectionsNames() {
-    // Get collection and gallery data.
-    $collections_array = [];
+  public function getContainersNames() {
+    // Get collection data.
+    $containers_array = [];
     if (!empty($this->token)) {
-      $endpoint = 'collection';
+      $endpoint = 'collection/root/children';
       $fullUrl  = $this->baseUrl . $endpoint .
         '?api_key=' . $this->apiKey .
-        '&auth_token=' . $this->token .
-        '&fields=collection_id,name';
+        '&auth_token=' . $this->token;
 
       $curl    = curl_init($fullUrl);
       curl_setopt_array($curl, $this->curlOptions);
@@ -205,13 +212,31 @@ class PhotoshelterService {
         echo "cURL Error #:" . $err;
         exit(1);
       }
+
       $response    = json_decode($response, TRUE);
-      $collections = $response['data']['Collection'];
+      $collections = $response['data']['Children']['Collection'];
       foreach ($collections as $collection) {
-        $collections_array[$collection['collection_id']] = $collection['name'];
+        if ($collection['mode'] == 'everyone' || $this->allowPrivate == TRUE) {
+          $containers_array[] = [
+            'name' => $collection['name'],
+            'id' => $collection['collection_id'],
+            'type' => 'collection',
+          ];
+        }
+      }
+
+      $galleries = $response['data']['Children']['Gallery'];
+      foreach ($galleries as $gallery) {
+        if ($gallery['mode'] == 'everyone' || $this->allowPrivate == TRUE) {
+          $containers_array[] = [
+            'name' => $gallery['name'],
+            'id' => $gallery['gallery_id'],
+            'type' => 'gallery',
+          ];
+        }
       }
     }
-    return $collections_array;
+    return $containers_array;
   }
 
   /**
@@ -237,25 +262,59 @@ class PhotoshelterService {
         $time = DateTime::createFromFormat(DateTime::RFC850, $time,
           new DateTimeZone('GMT'));
       }
+      // Update time saved in config.
+      $this->updateConfigPostSync($config);
 
-      // Get the data.
-      $queueItems = $this->getCollections($time, TRUE, 'queue');
-      if (!empty($queueItems)) {
-        \Drupal::logger('photoshelter')->notice(t('Start photoshelter queueing of galleries for synchronization'));
+      $update = TRUE;
+      $process = 'queue';
 
-        $queue_factory = \Drupal::service('queue');
-        $queue = $queue_factory->get('photoshelter_syncnew_gallery');
-        $queue->createQueue();
-
-        foreach ($queueItems as $queueItem) {
-          $queue->createItem($queueItem);
+      $queueGalleries = [];
+      $root_galleries = $this->rootGalleries;
+      foreach ($root_galleries as $gallery_id) {
+        if ($gallery_id != '0') {
+          $queueGalleries[] = [
+            'gallery_id' => $gallery_id,
+            'time' => $time,
+            'update' => $update,
+            'parentId' => NULL,
+          ];
         }
+      }
 
-        // Update time saved in config.
-        $this->updateConfigPostSync($config);
+      $queueCollections = [];
+      $root_collections = $this->rootCollections;
+      foreach ($root_collections as $collection_id) {
+        if ($collection_id != '0') {
+          $queueCollections[] = [
+            'collection_id' => $collection_id,
+            'time' => $time,
+            'update' => $update,
+            'parentId' => NULL,
+          ];
+        }
+      }
+
+      if (empty($queueCollections) && empty($queueGalleries)) {
+        \Drupal::logger('photoshelter')->notice(t('No new data to synchronize on photoshelter'));
       }
       else {
-        \Drupal::logger('photoshelter')->notice(t('No new data to synchronize on photoshelter'));
+        $queue_factory = \Drupal::service('queue');
+        if (!empty($queueGalleries)) {
+          \Drupal::logger('photoshelter')->notice(t('PhotoShelter queueing of galleries for synchronization'));
+          $queue = $queue_factory->get('photoshelter_syncnew_gallery');
+          $queue->createQueue();
+          foreach ($queueGalleries as $queueItem) {
+            $queue->createItem($queueItem);
+          }
+        }
+        if (!empty($queueCollections)) {
+          \Drupal::logger('photoshelter')->notice(t('PhotoShelter queueing of collections for synchronization'));
+          $queue = $queue_factory->get('photoshelter_syncnew_collection');
+          $queue->createQueue();
+          foreach ($queueCollections as $queueItem) {
+            $queue->createItem($queueItem);
+          }
+        }
       }
     }
   }
@@ -272,13 +331,6 @@ class PhotoshelterService {
    */
   public function getData(DateTime $time, $update = FALSE) {
 
-    $operations = $this->getCollections($time, $update, 'batch');
-    $batch = array(
-      'title' => t('galleries import'),
-      'operations' => $operations,
-      'finished' => 'photoshelter_sync_finished',
-      'file' => drupal_get_path('module', 'photoshelter') . '/photoshelter.batch.inc',
-    );
     if ($update) {
       \Drupal::logger('photoshelter')->notice(t('Start photoshelter synchronization of new additions'));
     }
@@ -286,98 +338,43 @@ class PhotoshelterService {
       \Drupal::logger('photoshelter')->notice(t('Start photoshelter synchronization of all data'));
     }
 
+    $operations = [];
+
+    $root_galleries = $this->rootGalleries;
+    foreach ($root_galleries as $gallery_id) {
+      if ($gallery_id != '0') {
+        $operations[] = [
+          'photoshelter_sync_gallery',
+          [$gallery_id, $time, $update, NULL],
+        ];
+      }
+    }
+
+    $root_collections = $this->rootCollections;
+    foreach ($root_collections as $collection_id) {
+      if ($collection_id != '0') {
+        $operations[] = [
+          'photoshelter_sync_collection',
+          [$collection_id, $time, $update, NULL],
+        ];
+      }
+    }
+
+    $batch = array(
+      'title' => t('PhotoShelter synchronization'),
+      'operations' => $operations,
+      'finished' => 'photoshelter_sync_finished',
+      'file' => drupal_get_path('module', 'photoshelter') . '/photoshelter.batch.inc',
+    );
+
     batch_set($batch);
   }
 
   /**
-   * Retrieve Collections.
+   * Send request to get one collection and get results.
    *
-   * @param DateTime $time
-   *   Date to compare with for update.
-   * @param bool $update
-   *   If update or full sync.
-   * @param string $process
-   *   Type of process (batch or queue).
-   *
-   * @return array
-   *   Array of operations for batch or array of data for queue.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  private function getCollections(DateTime $time, $update, $process) {
-    $collections = $this->collections;
-    $extend = [
-      'KeyImage' => [
-        'fields' => 'image_id',
-        'params' => [],
-      ],
-      'ImageLink' => [
-        'fields' => 'link',
-        'params' => [
-          'image_size' => $this->maxDim,
-          'f_https_link' => 't',
-        ],
-      ],
-      'Visibility' => [
-        'fields' => 'mode',
-        'params' => [],
-      ],
-      'Children' => [
-        'Gallery' => [
-          'fields' => 'gallery_id,name,description,f_list,modified_at,access_inherit',
-          'params' => [],
-        ],
-        'Collection' => [
-          'fields' => 'collection_id,name,description,f_list,modified_at,access_inherit',
-          'params' => [],
-        ],
-      ],
-    ];
-    $extend_json = json_encode($extend);
-    // Cycle through all collections.
-    $operations = [];
-    foreach ($collections as $key => $collectionId) {
-      if ($collectionId != '0') {
-        $endpoint = 'collection/' . $collectionId;
-        $fullUrl  = $this->baseUrl . $endpoint .
-          '?fields=collection_id,name,description,mode,f_list,modified_at' .
-          '&api_key=' . $this->apiKey .
-          '&auth_token=' . $this->token .
-          '&extend=' . $extend_json;
-
-        $curl    = curl_init($fullUrl);
-        curl_setopt_array($curl, $this->curlOptions);
-
-        $response = curl_exec($curl);
-        $err      = curl_error($curl);
-
-        curl_close($curl);
-
-        if ($err) {
-          echo "cURL Error #:" . $err;
-          exit(1);
-        }
-        $response    = json_decode($response, TRUE);
-        $collection_array = $response['data']['Collection'];
-        if ($collection_array['f_list'] === 'f' && $this->allowPrivate == FALSE) {
-          continue;
-        }
-        if ($process == 'batch') {
-          $operations = array_merge($operations, $this->saveOneCollection($collection_array, $time, $update, NULL, 'batch'));
-        }
-        elseif ($process == 'queue') {
-          $operations = array_merge($operations, $this->saveOneCollection($collection_array, $time, $update, NULL, 'queue'));
-        }
-      }
-    }
-    return $operations;
-  }
-
-  /**
-   * Send request for a child collection.
-   *
-   * @param string $collectionId
-   *   The collection ID.
+   * @param string $collection_id
+   *   The collection PhotoShelter ID.
    * @param DateTime $time
    *   Date to compare with for update.
    * @param bool $update
@@ -387,13 +384,10 @@ class PhotoshelterService {
    * @param string|null $parentId
    *   Parent collection ID.
    *
-   * @return array
-   *   Array of operations for batch or array of data for queue.
-   *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  private function curlOneCollection($collectionId, DateTime $time, $update, $process, $parentId = NULL) {
-    $endpoint = 'collection/' . $collectionId;
+  public function getCollection($collection_id, DateTime $time, $update, $process, $parentId = NULL) {
+    $endpoint = 'collection/' . $collection_id;
     $extend = [
       'KeyImage' => [
         'fields' => 'image_id',
@@ -412,18 +406,81 @@ class PhotoshelterService {
       ],
       'Children' => [
         'Gallery' => [
-          'fields' => 'gallery_id,name,description,f_list,modified_at,access_inherit',
+          'fields' => 'gallery_id',
           'params' => [],
         ],
         'Collection' => [
-          'fields' => 'collection_id,name,description,f_list,modified_at,access_inherit',
+          'fields' => 'collection_id',
           'params' => [],
         ],
       ],
     ];
     $extend_json = json_encode($extend);
     $fullUrl  = $this->baseUrl . $endpoint .
-      '?fields=collection_id,name,description,f_list,mode,modified_at' .
+     '?fields=collection_id,name,description,effective_mode,modified_at' .
+     '&api_key=' . $this->apiKey .
+     '&auth_token=' . $this->token .
+     "&extend=" . $extend_json;
+
+    $curl    = curl_init($fullUrl);
+    curl_setopt_array($curl, $this->curlOptions);
+
+    $response = curl_exec($curl);
+    $err      = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+      echo "cURL Error #:" . $err;
+    }
+
+    $jsonResponse = json_decode($response, TRUE);
+    $collection   = $jsonResponse['data']['Collection'];
+
+    if ($collection['Visibility']['mode'] == 'everyone' || $this->allowPrivate == TRUE) {
+      $this->saveCollection($collection, $time, $update, $collection['Visibility']['mode'], $process, $parentId);
+    }
+  }
+
+  /**
+   * Send request to get one gallery and get results.
+   *
+   * @param string $gallery_id
+   *   The gallery PhotoShelter ID.
+   * @param DateTime $time
+   *   Date to compare with for update.
+   * @param bool $update
+   *   If update or full sync.
+   * @param string $process
+   *   Type of process (batch or queue).
+   * @param string|null $parentId
+   *   Parent collection ID.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function getGallery($gallery_id, DateTime $time, $update, $process, $parentId = NULL) {
+
+    $endpoint = 'gallery/' . $gallery_id;
+    $extend = [
+      'KeyImage' => [
+        'fields' => 'image_id',
+        'params' => [],
+      ],
+      'ImageLink' => [
+        'fields' => 'link',
+        'params' => [
+          'image_size' => $this->maxDim,
+          'f_https_link' => 't',
+        ],
+      ],
+      'Visibility' => [
+        'fields' => 'mode',
+        'params' => [],
+      ],
+    ];
+    $extend_json = json_encode($extend);
+    $fullUrl  = $this->baseUrl . $endpoint .
+      '?fields=gallery_id,name,description,modified_at' .
       '&api_key=' . $this->apiKey .
       '&auth_token=' . $this->token .
       "&extend=" . $extend_json;
@@ -441,20 +498,23 @@ class PhotoshelterService {
     }
 
     $jsonResponse = json_decode($response, TRUE);
-    $collection   = $jsonResponse['data']['Collection'];
-    $operations = [];
-    if ($process == 'batch') {
-      $operations = $this->saveOneCollection($collection, $time, $update, $collection['Visibility']['mode'], 'batch', $parentId);
+    $gallery   = $jsonResponse['data']['Gallery'];
+    if ($gallery['Visibility']['mode'] == 'everyone' || $this->allowPrivate == TRUE) {
+      if ($update) {
+        // Check if modified time is after time.
+        $galleryTime = DateTime::createFromFormat('Y-m-d H:i:s e', $gallery['modified_at'], new DateTimeZone('GMT'));
+        if ($galleryTime > $time) {
+          $this->saveGallery($gallery, $time, $update, $gallery['Visibility']['mode'], $process, $parentId);
+        }
+      }
+      else {
+        $this->saveGallery($gallery, $time, $update, $gallery['Visibility']['mode'], $process, $parentId);
+      }
     }
-    elseif ($process == 'queue') {
-      $operations = $this->saveOneCollection($collection, $time, $update, $collection['Visibility']['mode'], 'queue', $parentId);
-    }
-
-    return $operations;
   }
 
   /**
-   * Get one collection data.
+   * Save one collection data and add children to batch or queue.
    *
    * @param array $collection
    *   The collection data array.
@@ -469,12 +529,9 @@ class PhotoshelterService {
    * @param string|null $parentId
    *   Parent collection ID.
    *
-   * @return array
-   *   Array of operations for batch or array of data for queue.
-   *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  private function saveOneCollection(array $collection, DateTime $time, $update, $collectionVisibility, $process, $parentId = NULL) {
+  private function saveCollection(array $collection, DateTime $time, $update, $collectionVisibility, $process, $parentId = NULL) {
     $collectionId   = $collection['collection_id'];
     $collectionName = $collection['name'];
     $cModified      = $collection['modified_at'];
@@ -484,64 +541,56 @@ class PhotoshelterService {
     $cKeyImageFile  = $collection['KeyImage']['ImageLink']['link'];
     unset($collection);
 
-    // Check if modified time is after time.
     $collectionTime = DateTime::createFromFormat('Y-m-d H:i:s e',
       $cModified, new DateTimeZone('GMT'));
-    if ($update && $collectionTime < $time) {
 
+    if ($cKeyImageFile !== NULL) {
+      $file = File::create(['uri' => $cKeyImageFile]);
+      $file->save();
     }
-    else {
-      if ($cKeyImageFile !== NULL) {
-        $file = File::create(['uri' => $cKeyImageFile]);
-        $file->save();
-      }
 
-      // If already exist, update instead of create.
-      $collection_id = $this->collectionExists($collectionId);
-      if (!empty($collection_id)) {
+    // If already exist, update if needed.
+    $collection_id = $this->containerExists($collectionId);
+    if (!empty($collection_id)) {
+      if ($update &&  $collectionTime < $time) {
+        // The collection has not been modified, no update needed.
+      }
+      else {
         $term = Term::load($collection_id);
         $term->set('name', $collectionName);
         $term->set('description', $cDescription);
         $term->set('field_ps_permission', $collectionVisibility);
         $term->set('field_ps_parent_id', $parentId);
-        $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+        $term->set('parent', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
         $term->set('field_ps_modified_at', $cModified);
         $term->set('field_ps_key_image_id', $cKeyImage);
         $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
-      }
-      else {
-        // Create term from $collection.
-        $term = Term::create([
-          'langcode'             => 'en',
-          'vid'                 => 'ps_collection',
-          'name'           => $collectionName,
-          'description'    => $cDescription,
-          'field_ps_permission'   => $collectionVisibility,
-          'field_ps_id'             => $collectionId,
-          'field_ps_parent_id'      => $parentId,
-          'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
-          'field_ps_modified_at' => $cModified,
-          'field_ps_key_image_id'   => $cKeyImage,
-          'field_ps_key_image' => isset($file) ?
-            ['target_id' => $file->id()] : NULL,
-        ]);
-      }
-
-      try {
         $term->save();
       }
-      catch (Exception $e) {
-        echo $e->getMessage();
-        exit(1);
-      }
-
-      if (isset($file)) {
-        unset($file);
-      }
-      unset($term);
+    }
+    else {
+      // If new collection force synchronization of children.
+      $update = FALSE;
+      // Create term from $collection.
+      $term = Term::create([
+        'langcode'             => 'en',
+        'vid'                 => 'ps_container',
+        'name'           => $collectionName,
+        'description'    => $cDescription,
+        'field_ps_permission'   => $collectionVisibility,
+        'field_ps_id'             => $collectionId,
+        'field_ps_parent_id'      => $parentId,
+        'parent' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
+        'field_ps_modified_at' => $cModified,
+        'field_ps_key_image_id'   => $cKeyImage,
+        'field_ps_key_image' => isset($file) ?
+          ['target_id' => $file->id()] : NULL,
+      ]);
+      $term->save();
     }
 
-    $operations = [];
+    $queueGalleries = [];
+    $queueCollections = [];
     // Create terms for children.
     if (isset($cChildren)) {
       foreach ($cChildren as $child) {
@@ -560,12 +609,12 @@ class PhotoshelterService {
               if ($process == 'batch') {
                 $operations[] = [
                   'photoshelter_sync_gallery',
-                  [$gallery, $time, $update, $collectionId],
+                  [$gallery['gallery_id'], $time, $update, $collectionId],
                 ];
               }
               elseif ($process == 'queue') {
-                $operations[] = [
-                  'gallery' => $gallery,
+                $queueGalleries[] = [
+                  'gallery_id' => $gallery['gallery_id'],
                   'time' => $time,
                   'update' => $update,
                   'parentId' => $collectionId,
@@ -578,10 +627,23 @@ class PhotoshelterService {
           case 'Collection':
             foreach ($child as $childCollection) {
               if ($process == 'batch') {
-                $operations = $this->curlOneCollection($childCollection['collection_id'], $time, $update, 'batch', $collectionId);
+                $operations[] = [
+                  'photoshelter_sync_collection',
+                  [
+                    $childCollection['collection_id'],
+                    $time,
+                    $update,
+                    $collectionId,
+                  ],
+                ];
               }
               elseif ($process == 'queue') {
-                $operations = $this->curlOneCollection($childCollection['collection_id'], $time, $update, 'queue', $collectionId);
+                $queueCollections[] = [
+                  'collection_id' => $childCollection['collection_id'],
+                  'time' => $time,
+                  'update' => $update,
+                  'parentId' => $collectionId,
+                ];
               }
 
               unset($childCollection);
@@ -592,8 +654,41 @@ class PhotoshelterService {
         unset($child);
         next($cChildren);
       }
+
+      if (!empty($operations)) {
+        $batch = array(
+          'title' => t('Synchronization of ') . $collectionName,
+          'operations' => $operations,
+          'finished' => 'photoshelter_sync_finished',
+          'file' => drupal_get_path('module', 'photoshelter') . '/photoshelter.batch.inc',
+        );
+
+        batch_set($batch);
+      }
+
+      if (empty($queueCollections) && empty($queueGalleries)) {
+        \Drupal::logger('photoshelter')->notice(t('No new data to synchronize on photoshelter'));
+      }
+      else {
+        $queue_factory = \Drupal::service('queue');
+        if (!empty($queueGalleries)) {
+          \Drupal::logger('photoshelter')->notice(t('PhotoShelter queueing of galleries for synchronization'));
+          $queue = $queue_factory->get('photoshelter_syncnew_gallery');
+          $queue->createQueue();
+          foreach ($queueGalleries as $queueItem) {
+            $queue->createItem($queueItem);
+          }
+        }
+        if (!empty($queueCollections)) {
+          \Drupal::logger('photoshelter')->notice(t('PhotoShelter queueing of collections for synchronization'));
+          $queue = $queue_factory->get('photoshelter_syncnew_collection');
+          $queue->createQueue();
+          foreach ($queueCollections as $queueItem) {
+            $queue->createItem($queueItem);
+          }
+        }
+      }
     }
-    return $operations;
   }
 
   /**
@@ -605,6 +700,8 @@ class PhotoshelterService {
    *   Date to compare with for update.
    * @param bool $update
    *   If update or full sync.
+   * @param string $galleryVisibility
+   *   The gallery visibility.
    * @param string $process
    *   Type of process (batch or queue).
    * @param string|null $parentId
@@ -612,8 +709,7 @@ class PhotoshelterService {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function getGallery(array $gallery, DateTime $time, $update, $process, $parentId = NULL) {
-    $galleryVisibility  = $gallery['Visibility']['mode'];
+  private function saveGallery(array $gallery, DateTime $time, $update, $galleryVisibility, $process, $parentId = NULL) {
     $galleryId          = $gallery['gallery_id'];
     $galleryModified    = $gallery['modified_at'];
     $galleryName        = $gallery['name'];
@@ -622,52 +718,51 @@ class PhotoshelterService {
     $galleryImageFile   = $gallery['KeyImage']['ImageLink']['link'];
     unset($gallery);
 
+    $galleryTime = DateTime::createFromFormat('Y-m-d H:i:s e',
+      $galleryModified, new DateTimeZone('GMT'));
+
     if (isset($galleryImageFile)) {
       $file = File::create(['uri' => $galleryImageFile]);
       $file->save();
     }
 
     // If already exists, update instead of create.
-    $gallery_id = $this->galleryExists($galleryId);
+    $gallery_id = $this->containerExists($galleryId);
     if (!empty($gallery_id)) {
-      $term = Term::load($gallery_id);
-      $term->set('name', $galleryName);
-      $term->set('description', $galleryDescription);
-      $term->set('field_ps_permission', $galleryVisibility);
-      $term->set('field_ps_parent_id', $parentId);
-      $term->set('field_ps_parent_collection', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
-      $term->set('field_ps_modified_at', $galleryModified);
-      $term->set('field_ps_key_image_id', $galleryImage);
-      $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
+      if ($update &&  $galleryTime < $time) {
+        // The collection has not been modified, no update needed.
+      }
+      else {
+        $term = Term::load($gallery_id);
+        $term->set('name', $galleryName);
+        $term->set('description', $galleryDescription);
+        $term->set('field_ps_permission', $galleryVisibility);
+        $term->set('field_ps_parent_id', $parentId);
+        $term->set('parent', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+        $term->set('field_ps_modified_at', $galleryModified);
+        $term->set('field_ps_key_image_id', $galleryImage);
+        $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
+        $term->save();
+      }
     }
     else {
+      // If new gallery force synchronization of children.
+      $update = FALSE;
       $term = Term::create([
         'langcode'             => 'en',
-        'vid'                 => 'ps_gallery',
+        'vid'                 => 'ps_container',
         'name'           => $galleryName,
         'description'    => $galleryDescription,
         'field_ps_permission'   => $galleryVisibility ,
         'field_ps_id'             => $galleryId,
         'field_ps_parent_id'      => $parentId,
-        'field_ps_parent_collection' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
+        'parent' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
         'field_ps_modified_at' => $galleryModified,
         'field_ps_key_image_id'   => $galleryImage,
         'field_ps_key_image' => isset($file) ? ['target_id' => $file->id()] : NULL,
       ]);
-    }
-
-    try {
       $term->save();
     }
-    catch (Exception $e) {
-      echo $e->getMessage();
-      exit(1);
-    }
-
-    if (isset($file)) {
-      unset($file);
-    }
-    unset($term);
 
     $this->getPhotos($galleryId, $galleryVisibility, $time, $process, $update);
   }
@@ -777,7 +872,7 @@ class PhotoshelterService {
 
     if ($process == 'batch') {
       $batch = array(
-        'title' => t('photos import'),
+        'title' => t('Photos import'),
         'operations' => $operations,
         'finished' => 'photoshelter_sync_photo_finished',
         'file' => drupal_get_path('module', 'photoshelter') . '/photoshelter.batch.inc',
@@ -800,10 +895,7 @@ class PhotoshelterService {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function getPhoto(array $image, $parentVisibility) {
-    // Skip if image isn't public.
-    if ($image['f_visible'] === 'f' && $this->allowPrivate == FALSE) {
-      return;
-    }
+
     $imageUpdate   = $image['Image']['updated_at'];
     $imageId       = $image['image_id'];
     $imageName     = $image['Image']['file_name'];
@@ -829,7 +921,7 @@ class PhotoshelterService {
       $media->set('name', $imageName);
       $media->set('field_ps_permission', $parentVisibility);
       $media->set('field_ps_parent_id', $parentId);
-      $media->set('field_ps_parent_gallery', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
+      $media->set('field_ps_parent_container', isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL);
       $media->set('field_ps_modified_at', $imageUpdate);
       $media->set('field_ps_caption', $imageCaption);
       $media->set('field_ps_credit', $imageCredit);
@@ -852,7 +944,7 @@ class PhotoshelterService {
         'field_ps_permission'   => $parentVisibility,
         'field_ps_id'             => $imageId,
         'field_ps_parent_id'      => $parentId,
-        'field_ps_parent_gallery' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
+        'field_ps_parent_container' => isset($parentId) ? ['target_id' => $this->getParentTerm($parentId)] : NULL,
         'field_ps_modified_at' => $imageUpdate,
         'field_ps_caption'        => $imageCaption,
         'field_ps_credit'         => $imageCredit,
@@ -916,36 +1008,18 @@ class PhotoshelterService {
   }
 
   /**
-   * Check if collection term exist.
+   * Check if container term exist.
    *
-   * @param string $collection_ps_id
-   *   Photoshelter id of the collection.
-   *
-   * @return string
-   *   Taxonomy term id.
-   */
-  private function collectionExists($collection_ps_id) {
-    $query = \Drupal::entityQuery('taxonomy_term');
-    $query->condition('vid', 'ps_collection');
-    $query->condition('field_ps_id', $collection_ps_id);
-    $tids = $query->execute();
-    $tid = !empty($tids) ? reset($tids) : '';
-    return $tid;
-  }
-
-  /**
-   * Check if gallery term exist.
-   *
-   * @param string $gallery_ps_id
-   *   Photoshelter id of the gallery.
+   * @param string $container_ps_id
+   *   Photoshelter id of the container.
    *
    * @return string
    *   Taxonomy term id.
    */
-  private function galleryExists($gallery_ps_id) {
+  private function containerExists($container_ps_id) {
     $query = \Drupal::entityQuery('taxonomy_term');
-    $query->condition('vid', 'ps_gallery');
-    $query->condition('field_ps_id', $gallery_ps_id);
+    $query->condition('vid', 'ps_container');
+    $query->condition('field_ps_id', $container_ps_id);
     $tids = $query->execute();
     $tid = !empty($tids) ? reset($tids) : '';
     return $tid;

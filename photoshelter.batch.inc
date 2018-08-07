@@ -8,8 +8,8 @@
 /**
  * Batch function for gallery synchronization.
  *
- * @param array $gallery
- *   The gallery data.
+ * @param string $gallery_id
+ *   The gallery ID.
  * @param DateTime $time
  *   Date to compare with for update.
  * @param bool $update
@@ -19,17 +19,46 @@
  * @param array $context
  *   The Batch context array.
  */
-function photoshelter_sync_gallery(array $gallery, DateTime $time, $update, $parentId, &$context) {
+function photoshelter_sync_gallery($gallery_id, DateTime $time, $update, $parentId, &$context) {
   if (!isset($context['service'])) {
     $context['service'] = \Drupal::service('photoshelter.photoshelter_service');
   }
 
   $service = $context['service'];
-  $service->getGallery($gallery, $time, $update, 'batch', $parentId);
+  $service->getGallery($gallery_id, $time, $update, 'batch', $parentId);
 
-  $context['results'][] = $gallery['name'];
+  $context['results']['galleries'][] = $gallery_id;
 
-  $message = t('Synchronization of gallery') . ' ' . $gallery['name'];
+  $message = t('Synchronization of gallery') . ' ' . $gallery_id;
+
+  $context['message'] = $message;
+
+}
+
+/**
+ * Batch function for collection synchronization.
+ *
+ * @param string $collection_id
+ *   The collection ID.
+ * @param DateTime $time
+ *   Date to compare with for update.
+ * @param bool $update
+ *   If update or full sync.
+ * @param string $parentId
+ *   Parent collection ID.
+ * @param array $context
+ *   The Batch context array.
+ */
+function photoshelter_sync_collection($collection_id, DateTime $time, $update, $parentId, &$context) {
+  if (!isset($context['service'])) {
+    $context['service'] = \Drupal::service('photoshelter.photoshelter_service');
+  }
+  $service = $context['service'];
+  $service->getCollection($collection_id, $time, $update, 'batch', $parentId);
+
+  $context['results']['collections'][] = $collection_id;
+
+  $message = t('Synchronization of collection') . ' ' . $collection_id;
 
   $context['message'] = $message;
 
@@ -48,19 +77,25 @@ function photoshelter_sync_gallery(array $gallery, DateTime $time, $update, $par
 function photoshelter_sync_finished($success, $results, $operations) {
   $messenger = \Drupal::messenger();
   $logger = \Drupal::logger('photoshelter');
-
   if ($success) {
-    $message = \Drupal::translation()->formatPlural(
-      count($results),
+    $message1 = \Drupal::translation()->formatPlural(
+      count($results['collections']),
+      '1 Synchronized collection', '@count Synchronized collections.'
+    );
+    $logger->notice($message1);
+    $messenger->addMessage($message1);
+    $message2 = \Drupal::translation()->formatPlural(
+      count($results['galleries']),
       '1 Synchronized gallery', '@count Synchronized galleries.'
     );
-    $logger->notice($message);
+    $logger->notice($message2);
+    $messenger->addMessage($message2);
   }
   else {
     $message = t('Finished with an error.');
     $logger->error($message);
+    $messenger->addMessage($message);
   }
-  $messenger->addMessage($message);
 }
 
 /**

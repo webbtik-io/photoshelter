@@ -78,17 +78,35 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       '#size' => 4,
       '#default_value' => $config->get('max_height'),
     ];
-    $collection_names = $config->get('collections_names');
-    $collection_values = $config->get('collections');
-    if (isset($collection_names) && !empty($collection_names)) {
+    $container_names = $config->get('containers_names');
+    if (isset($container_names) && !empty($container_names)) {
+      $collection_options = [];
+      $gallery_options = [];
+      foreach ($container_names as $container) {
+        if ($container['type'] == 'collection') {
+          $collection_options[$container['id']] = $container['name'];
+        }
+        else {
+          $gallery_options[$container['id']] = $container['name'];
+        }
+      }
       $form['collections'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Collections'),
-        '#options' => $collection_names,
-        '#description' => $this->t('Choose collections to synchronize'),
+        '#options' => $collection_options,
       ];
+      $form['galleries'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Galleries'),
+        '#options' => $gallery_options,
+      ];
+      $collection_values = $config->get('collections');
       if (!empty($collection_values)) {
         $form['collections']['#default_value'] = $collection_values;
+      }
+      $gallery_values = $config->get('galleries');
+      if (!empty($gallery_values)) {
+        $form['galleries']['#default_value'] = $gallery_values;
       }
       $form['sync_new'] = [
         '#type'  => 'submit',
@@ -101,9 +119,9 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         '#submit' => ['::syncFullSubmit'],
       ];
     }
-    $form['get_collection'] = [
+    $form['get_containers'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Get collections names'),
+      '#value' => $this->t('Get root containers names'),
       '#submit' => ['::getCollectionsNames'],
     ];
     return $form;
@@ -188,8 +206,8 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   public function getCollectionsNames(array &$form, FormStateInterface $form_state) {
     $config = $this->saveConfig($form_state);
     $ps_service = \Drupal::service('photoshelter.photoshelter_service');
-    $collections_names = $ps_service->getCollectionsNames();
-    $config->set('collections_names', $collections_names);
+    $containers_names = $ps_service->getContainersNames();
+    $config->set('containers_names', $containers_names);
     $config->save();
   }
 
@@ -214,6 +232,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $config->set('max_width', $form_state->getValue('max_width'));
     $config->set('max_height', $form_state->getValue('max_height'));
     $config->set('collections', $form_state->getValue('collections'));
+    $config->set('galleries', $form_state->getValue('galleries'));
     $config->save();
 
     return $config;

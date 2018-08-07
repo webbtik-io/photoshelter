@@ -2,6 +2,9 @@ uuid: 8a7d36fc-d747-494d-8500-8a4d6e864a6a
 langcode: en
 status: true
 dependencies:
+  enforced:
+    module:
+      - photoshelter
   module:
     - options
     - taxonomy

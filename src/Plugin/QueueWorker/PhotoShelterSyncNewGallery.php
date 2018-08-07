@@ -19,9 +19,9 @@ class PhotoShelterSyncNewGallery extends QueueWorkerBase {
    * {@inheritdoc}
    */
   public function processItem($data) {
-    \Drupal::logger('photoshelter')->notice(t('synchronization of gallery') . ' ' . $data['gallery']['name']);
+    \Drupal::logger('photoshelter')->notice(t('synchronization of gallery') . ' ' . $data['gallery_id']);
     $service = \Drupal::service('photoshelter.photoshelter_service');
-    $service->getGallery($data['gallery'], $data['time'], $data['update'], 'queue', $data['parentId']);
+    $service->getGallery($data['gallery_id'], $data['time'], $data['update'], 'queue', $data['parentId']);
   }
 
 }
