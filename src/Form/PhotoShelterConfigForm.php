@@ -113,11 +113,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
         '#value' => t('Sync New Additions'),
         '#submit' => ['::syncNewSubmit'],
       ];
-      $form['sync_full'] = [
-        '#type'  => 'submit',
-        '#value' => 'Sync All Data',
-        '#submit' => ['::syncFullSubmit'],
-      ];
     }
     $form['get_containers'] = [
       '#type' => 'submit',
@@ -141,28 +136,6 @@ class PhotoShelterConfigForm extends ConfigFormBase {
     $this->saveConfig($form_state);
     $ps_service = \Drupal::service('photoshelter.photoshelter_service');
     $ps_service->authenticate();
-  }
-
-  /**
-   * Synchronize all the selected collections.
-   *
-   * @param array $form
-   *   The form array.
-   * @param FormStateInterface $form_state
-   *   The form state object.
-   */
-  public function syncFullSubmit(array &$form, FormStateInterface $form_state) {
-    $config = $this->saveConfig($form_state);
-
-    $time = new DateTime(19700101);
-
-    $ps_service = \Drupal::service('photoshelter.photoshelter_service');
-
-    // Get the data.
-    $ps_service->getData($time);
-
-    // Update time saved in config.
-    $ps_service->updateConfigPostSync($config, TRUE);
   }
 
   /**

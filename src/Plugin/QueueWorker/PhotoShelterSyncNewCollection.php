@@ -21,7 +21,7 @@ class PhotoShelterSyncNewCollection extends QueueWorkerBase {
   public function processItem($data) {
     \Drupal::logger('photoshelter')->notice(t('synchronization of collection') . ' ' . $data['collection_id']);
     $service = \Drupal::service('photoshelter.photoshelter_service');
-    $service->getGallery($data['collection_id'], $data['time'], $data['update'], 'queue', $data['parentId']);
+    $service->getCollection($data['collection_id'], $data['time'], $data['update'], 'queue', $data['parentId']);
   }
 
 }

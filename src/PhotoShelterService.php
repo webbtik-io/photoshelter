@@ -266,7 +266,6 @@ class PhotoshelterService {
       $this->updateConfigPostSync($config);
 
       $update = TRUE;
-      $process = 'queue';
 
       $queueGalleries = [];
       $root_galleries = $this->rootGalleries;
@@ -1076,20 +1075,14 @@ class PhotoshelterService {
    *
    * @param \Drupal\Core\Config\Config $config
    *   The configuration object.
-   * @param bool $isFullSync
-   *   If it's a full sync or an update.
    */
-  public function updateConfigPostSync(Config &$config, $isFullSync = FALSE) {
+  public function updateConfigPostSync(Config &$config) {
     try {
       $currentTime = new DateTime(NULL, new DateTimeZone('GMT'));
     }
     catch (Exception $e) {
       echo $e->getMessage();
       exit(1);
-    }
-    if ($isFullSync) {
-      $config->set('last_full_sync', $currentTime->format(
-        DateTime::RFC850));
     }
     $config->set('last_sync', $currentTime->format(
       DateTime::RFC850));
