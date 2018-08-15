@@ -11,7 +11,7 @@ id: media.ps_image.field_ps_id
 field_name: field_ps_id
 entity_type: media
 bundle: ps_image
-label: 'PS ID'
+label: 'PhotoShelter ID'
 description: ''
 required: true
 translatable: false

@@ -12,7 +12,7 @@ id: media.ps_image.field_ps_tags
 field_name: field_ps_tags
 entity_type: media
 bundle: ps_image
-label: 'PS tags'
+label: 'PhotoShelter tags'
 description: ''
 required: false
 translatable: false

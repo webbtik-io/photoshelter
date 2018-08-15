@@ -11,7 +11,7 @@ id: taxonomy_term.ps_container.field_ps_id
 field_name: field_ps_id
 entity_type: taxonomy_term
 bundle: ps_container
-label: 'PS ID'
+label: 'PhotoShelter ID'
 description: 'Photoshelter id'
 required: true
 translatable: false
