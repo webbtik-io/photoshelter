@@ -1,33 +1,67 @@
+CONTENTS OF THIS FILE
+---------------------
 
-Copyright 2018 Inovae Sarl.
+ * Introduction
+ * Requirements
+ * Installation
+ * Configuration
+ * Maintainers
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at :
 
-    http://www.apache.org/licenses/LICENSE-2.0
+INTRODUCTION
+------------
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+The PhotoShelter is meant to integrate photo's stored on PhotoShelter onto your
+site. It does not copy your photo files to your server, but allows you to access
+and display them from your Drupal site. Each photo, gallery, and collection on
+your PhotoShelter site is saved as a type of symlink with meta data as a PS
+Photo, PS Container. If you don't check the "Allow synchronization
+of private files" option on configuragtion page, images marked visible by everyone
+in your PhotoShelter library are the only ones that will be copied over.
 
-# PhotoShelter Module
+ * For a full description of the module, visit the project page:
+   https://www.drupal.org/project/photoshelter
 
-This module is meant to integrate photo's stored on PhotoShelter onto your site. It does not copy your photo files to your server, but allows you to access and display them from your Drupal site. Each photo, gallery, and collection on your PhotoShelter site is saved as a type of symlink with meta data as a PS Photo, PS Gallery, or PS Collection. Sites in the "List on Site" category in your PhotoShelter are the only ones that will be copied over.
+ * To submit bug reports and feature suggestions, or to track changes:
+   https://www.drupal.org/project/issues/photoshelter
 
-# Dependencies
 
-- Remote stream wrapper
-- Media
+REQUIREMENTS
+------------
 
-# Requirements
+This module requires the following outside of Drupal core.
 
-- PHP 7.0
-- Drupal must be able to read and write this module
+ * Remote stream wrapper - https://www.drupal.org/project/remote_stream_wrapper
+ * PHP 7.0
 
-# TO-DO
 
-- Add unit tests
-- Document fields of each content type
+INSTALLATION
+------------
+
+ * Install the PhotoShelter module as you would normally install a contributed
+   Drupal module. Visit https://www.drupal.org/node/1897420 for further
+   information.
+
+
+CONFIGURATION
+-------------
+
+    1. Navigate to Administration > Extend and enable the module and its
+       dependencies.
+    2. Navigate to Administration > Configuration > Media > PhotoShelter
+       API to set the PhotoShelter account credentials and API key.
+    3. Save configurations.
+
+
+MAINTAINERS
+-----------
+
+ * olivier.br - https://www.drupal.org/u/olivierbr
+ * Blake Morgan (blakemorgan) - https://www.drupal.org/u/blakemorgan
+ * John Ouellet (labboy0276) - https://www.drupal.org/u/labboy0276
+
+Supporting organizations:
+
+ * Inovae - https://www.inovae.ch/
+ * Brigham Young University - https://www.drupal.org/brigham-young-university
+ * Tandem - https://www.drupal.org/tandem

@@ -1,5 +1,5 @@
 photoshelter_config_form:
-  path: 'admin/config/photoshelter/form'
+  path: 'admin/config/media/photoshelter'
   defaults:
     _form: '\Drupal\photoshelter\Form\PhotoShelterConfigForm'
     _title: 'PhotoShelter Config Form'
