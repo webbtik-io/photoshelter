@@ -78,18 +78,22 @@ function photoshelter_sync_finished($success, $results, $operations) {
   $messenger = \Drupal::messenger();
   $logger = \Drupal::logger('photoshelter');
   if ($success) {
-    $message1 = \Drupal::translation()->formatPlural(
-      count($results['collections']),
-      '1 Synchronized collection', '@count Synchronized collections.'
-    );
-    $logger->notice($message1);
-    $messenger->addMessage($message1);
-    $message2 = \Drupal::translation()->formatPlural(
-      count($results['galleries']),
-      '1 Synchronized gallery', '@count Synchronized galleries.'
-    );
-    $logger->notice($message2);
-    $messenger->addMessage($message2);
+    if (isset($results['collections'])) {
+      $message1 = \Drupal::translation()->formatPlural(
+        count($results['collections']),
+        '1 Synchronized collection', '@count Synchronized collections.'
+      );
+      $logger->notice($message1);
+      $messenger->addMessage($message1);
+    }
+    if (isset($results['galleries'])) {
+      $message2 = \Drupal::translation()->formatPlural(
+        count($results['galleries']),
+        '1 Synchronized gallery', '@count Synchronized galleries.'
+      );
+      $logger->notice($message2);
+      $messenger->addMessage($message2);
+    }
   }
   else {
     $message = t('Finished with an error.');
