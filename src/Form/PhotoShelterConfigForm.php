@@ -152,7 +152,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
 
     // Get the date.
     if ($time === 'Never') {
-      $time = new DateTime(NULL, new DateTimeZone('GMT'));
+      $time = new DateTime('1970-01-01', new DateTimeZone('GMT'));
     }
     else {
       $time = DateTime::createFromFormat(DateTime::RFC850, $time,

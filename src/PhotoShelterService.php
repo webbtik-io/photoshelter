@@ -251,7 +251,7 @@ class PhotoshelterService {
       // Get the date.
       if ($time === 'Never') {
         try {
-          $time = new DateTime(NULL, new DateTimeZone('GMT'));
+          $time = new DateTime('1970-01-01', new DateTimeZone('GMT'));
         }
         catch (Exception $e) {
           echo $e->getMessage();

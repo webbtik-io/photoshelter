@@ -56,6 +56,10 @@ class PhotoShelterDeleteForm extends FormBase {
       \Drupal::entityTypeManager()->getStorage('taxonomy_term')->delete($terms);
     }
 
+    $config = \Drupal::service('config.factory')->getEditable('photoshelter.settings');
+    $config->set('last_sync', 'Never');
+    $config->save();
+
   }
 
 }
