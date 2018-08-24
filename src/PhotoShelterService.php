@@ -61,6 +61,13 @@ class PhotoshelterService {
   protected $credentials;
 
   /**
+   * Current time.
+   *
+   * @var DateTime
+   */
+  protected $currentTime;
+
+  /**
    * Owner id for images.
    *
    * @var int
@@ -127,6 +134,7 @@ class PhotoshelterService {
     $this->maxDim = $config->get('max_width') . 'x' . $config->get('max_height');
     $this->rootCollections = $config->get('collections');
     $this->rootGalleries = $config->get('galleries');
+    $this->currentTime = new DateTime(NULL, new DateTimeZone('GMT'));
     $this->authenticate();
   }
 
@@ -567,6 +575,7 @@ class PhotoshelterService {
         $term->set('field_ps_modified_at', $cModified);
         $term->set('field_ps_key_image_id', $cKeyImage);
         $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
+        $term->set('field_ps_last_sync_date', $this->currentTime->format(DATETIME_DATETIME_STORAGE_FORMAT));
         $term->save();
       }
     }
@@ -587,6 +596,7 @@ class PhotoshelterService {
         'field_ps_key_image_id'   => $cKeyImage,
         'field_ps_key_image' => isset($file) ?
           ['target_id' => $file->id()] : NULL,
+        'field_ps_last_sync_date' => $this->currentTime->format(DATETIME_DATETIME_STORAGE_FORMAT),
       ]);
       $term->save();
     }
@@ -744,6 +754,7 @@ class PhotoshelterService {
         $term->set('field_ps_modified_at', $galleryModified);
         $term->set('field_ps_key_image_id', $galleryImage);
         $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
+        $term->set('field_ps_last_sync_date', $this->currentTime->format(DATETIME_DATETIME_STORAGE_FORMAT));
         $term->save();
       }
     }
@@ -762,6 +773,7 @@ class PhotoshelterService {
         'field_ps_modified_at' => $galleryModified,
         'field_ps_key_image_id'   => $galleryImage,
         'field_ps_key_image' => isset($file) ? ['target_id' => $file->id()] : NULL,
+        'field_ps_last_sync_date' => $this->currentTime->format(DATETIME_DATETIME_STORAGE_FORMAT),
       ]);
       $term->save();
     }
@@ -1080,14 +1092,7 @@ class PhotoshelterService {
    *   The configuration object.
    */
   public function updateConfigPostSync(Config &$config) {
-    try {
-      $currentTime = new DateTime(NULL, new DateTimeZone('GMT'));
-    }
-    catch (Exception $e) {
-      echo $e->getMessage();
-      exit(1);
-    }
-    $config->set('last_sync', $currentTime->format(
+    $config->set('last_sync', $this->currentTime->format(
       DateTime::RFC850));
     $config->save();
   }
