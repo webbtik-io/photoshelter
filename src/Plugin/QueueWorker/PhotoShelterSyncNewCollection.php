@@ -10,7 +10,7 @@ use Drupal\Core\Queue\QueueWorkerBase;
  * @QueueWorker(
  *   id = "photoshelter_syncnew_collection",
  *   title = @Translation("Photoshelter sync collection queue worker"),
- *   cron = {"time" = 20}
+ *   cron = {"time" = 30}
  * )
  */
 class PhotoShelterSyncNewCollection extends QueueWorkerBase {

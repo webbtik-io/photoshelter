@@ -9,7 +9,6 @@ dependencies:
   - field.field.media.ps_image.field_ps_id
   - field.field.media.ps_image.field_ps_modified_at
   - field.field.media.ps_image.field_ps_parent_container
-  - field.field.media.ps_image.field_ps_parent_id
   - field.field.media.ps_image.field_ps_permission
   - field.field.media.ps_image.field_ps_tags
   - image.style.thumbnail
@@ -87,14 +86,6 @@ content:
       placeholder: ''
     third_party_settings: {  }
     type: entity_reference_autocomplete
-    region: content
-  field_ps_parent_id:
-    weight: 6
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
     region: content
   field_ps_permission:
     weight: 9

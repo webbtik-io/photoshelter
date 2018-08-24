@@ -9,7 +9,6 @@ dependencies:
   - field.field.media.ps_image.field_ps_id
   - field.field.media.ps_image.field_ps_modified_at
   - field.field.media.ps_image.field_ps_parent_container
-  - field.field.media.ps_image.field_ps_parent_id
   - field.field.media.ps_image.field_ps_permission
   - field.field.media.ps_image.field_ps_tags
   - media.type.ps_image
@@ -70,14 +69,6 @@ content:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
-    region: content
-  field_ps_parent_id:
-    weight: 6
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
     region: content
   field_ps_tags:
     weight: 4

@@ -5,6 +5,8 @@
  * Contains batch functions for photoshelter synchronization.
  */
 
+use Drupal\taxonomy\Entity\Term;
+
 /**
  * Batch function for gallery synchronization.
  *
@@ -116,11 +118,14 @@ function photoshelter_sync_photo(array $image, $parentVisibility, &$context) {
   if (!isset($context['service'])) {
     $context['service'] = \Drupal::service('photoshelter.photoshelter_service');
   }
+  if (!isset($context['parent_id'])) {
+    $context['results']['parent_id'] = $image['Image']['gallery_id'];
+  }
 
   $service = $context['service'];
   $service->getPhoto($image, $parentVisibility);
 
-  $context['results'][] = $image['Image']['file_name'];
+  $context['results']['images'][] = $image['Image']['file_name'];
 
   $message = t('Synchronization of photo') . ' ' . $image['Image']['file_name'];
 
@@ -141,16 +146,24 @@ function photoshelter_sync_photo_finished($success, $results, $operations) {
   $messenger = \Drupal::messenger();
   $logger = \Drupal::logger('photoshelter');
   if ($success) {
-    $message = \Drupal::translation()->formatPlural(
-      count($results),
-      '1 Synchronized photo', '@count Synchronized photos.'
-    );
-    $logger->notice($message);
+    if (isset($results['images'])) {
+      $message = \Drupal::translation()->formatPlural(
+        count($results['images']),
+        '1 Synchronized photo', '@count Synchronized photos.'
+      );
+      $logger->notice($message);
+      $messenger->addMessage($message);
+      if (count($results['images']) > 0) {
+        $parent_gallery_tid = \Drupal::service('photoshelter.photoshelter_service')->getParentTerm($results['parent_id']);
+        $term = Term::load($parent_gallery_tid);
+        $term->set('field_ps_sync_complete', 1);
+        $term->save();
+      }
+    }
   }
   else {
     $message = t('Finished with an error.');
     $logger->error($message);
+    $messenger->addMessage($message);
   }
-  $messenger->addMessage($message);
-
 }

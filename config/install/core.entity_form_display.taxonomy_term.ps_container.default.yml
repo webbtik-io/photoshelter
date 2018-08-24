@@ -2,22 +2,24 @@ langcode: en
 status: true
 dependencies:
   config:
-  - field.field.taxonomy_term.ps_container.field_ps_container_type
-  - field.field.taxonomy_term.ps_container.field_ps_id
-  - field.field.taxonomy_term.ps_container.field_ps_key_image
-  - field.field.taxonomy_term.ps_container.field_ps_key_image_id
-  - field.field.taxonomy_term.ps_container.field_ps_modified_at
-  - field.field.taxonomy_term.ps_container.field_ps_parent_id
-  - field.field.taxonomy_term.ps_container.field_ps_permission
-  - image.style.thumbnail
-  - taxonomy.vocabulary.ps_container
+    - field.field.taxonomy_term.ps_container.field_ps_container_type
+    - field.field.taxonomy_term.ps_container.field_ps_id
+    - field.field.taxonomy_term.ps_container.field_ps_key_image
+    - field.field.taxonomy_term.ps_container.field_ps_key_image_id
+    - field.field.taxonomy_term.ps_container.field_ps_last_sync_date
+    - field.field.taxonomy_term.ps_container.field_ps_modified_at
+    - field.field.taxonomy_term.ps_container.field_ps_permission
+    - field.field.taxonomy_term.ps_container.field_ps_sync_complete
+    - image.style.thumbnail
+    - taxonomy.vocabulary.ps_container
   enforced:
     module:
     - photoshelter
   module:
-  - image
-  - path
-  - text
+    - datetime
+    - image
+    - path
+    - text
 id: taxonomy_term.ps_container.default
 targetEntityType: taxonomy_term
 bundle: ps_container
@@ -61,16 +63,14 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
+  field_ps_last_sync_date:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
   field_ps_modified_at:
     weight: 5
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_ps_parent_id:
-    weight: 4
     settings:
       size: 60
       placeholder: ''
@@ -84,6 +84,13 @@ content:
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
+    region: content
+  field_ps_sync_complete:
+    weight: 11
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
     region: content
   name:
     type: string_textfield

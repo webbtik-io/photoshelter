@@ -5,16 +5,15 @@ dependencies:
     module:
       - photoshelter
   module:
+    - datetime
     - taxonomy
-id: taxonomy_term.field_ps_parent_id
-field_name: field_ps_parent_id
+id: taxonomy_term.field_ps_last_sync_date
+field_name: field_ps_last_sync_date
 entity_type: taxonomy_term
-type: string
+type: datetime
 settings:
-  max_length: 255
-  is_ascii: false
-  case_sensitive: false
-module: core
+  datetime_type: datetime
+module: datetime
 locked: false
 cardinality: 1
 translatable: true
