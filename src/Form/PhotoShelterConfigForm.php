@@ -135,7 +135,13 @@ class PhotoShelterConfigForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->saveConfig($form_state);
     $ps_service = \Drupal::service('photoshelter.photoshelter_service');
-    $ps_service->authenticate();
+    $token = $ps_service->authenticate();
+    if ($token == 'error') {
+      $this->messenger()->addError(t('Invalid credentials'));
+    }
+    else {
+      $this->messenger()->addMessage(t('authentication successful'));
+    }
   }
 
   /**

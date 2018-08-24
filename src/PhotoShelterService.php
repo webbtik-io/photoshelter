@@ -156,7 +156,7 @@ class PhotoshelterService {
       curl_close($ch);
       $jsonResponse = json_decode($response, TRUE);
       if ($jsonResponse['status'] != 'ok') {
-        $this->messenger->addError(t('Invalid credentials'));
+        $this->token = 'error';
       }
       else {
         $this->token = $jsonResponse['data']['token'];
@@ -169,16 +169,8 @@ class PhotoshelterService {
             '&auth_token=' . $this->token;
           $ch = curl_init($fullUrl);
           curl_setopt_array($ch, $this->curlOptions);
-          $response = curl_exec($ch);
-          $jsonResponse = json_decode($response, TRUE);
-          if ($jsonResponse['status'] != 'ok') {
-            $this->messenger->addError(t('error when authenticate as an organization'));
-          }
+          curl_exec($ch);
           curl_close($ch);
-          $this->messenger->addMessage(t('The authentication as an organization is successfull'));
-        }
-        else {
-          $this->messenger->addMessage(t('The authentication is successfull'));
         }
       }
     }
@@ -192,6 +184,10 @@ class PhotoshelterService {
    *   Container array with ids and names and type.
    */
   public function getContainersNames() {
+    if ($this->token == 'error') {
+      $this->messenger->addError(t('Invalid credentials'));
+      return;
+    }
     // Get collection data.
     $containers_array = [];
     if (!empty($this->token)) {
@@ -243,6 +239,10 @@ class PhotoshelterService {
    * Queue items for synchronization if automatic sync is set in config form.
    */
   public function queueSyncNew() {
+    if ($this->token == 'error') {
+      \Drupal::logger('photoshelter')->error(t('Invalid credentials'));
+      return;
+    }
     $config = \Drupal::service('config.factory')->getEditable('photoshelter.settings');
     $automaticSync = $config->get('cron_sync');
     if ($automaticSync) {
@@ -329,7 +329,10 @@ class PhotoshelterService {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function getData(DateTime $time, $update = FALSE) {
-
+    if ($this->token == 'error') {
+      $this->messenger->addError(t('Invalid credentials'));
+      return;
+    }
     if ($update) {
       \Drupal::logger('photoshelter')->notice(t('Start photoshelter synchronization of new additions'));
     }
