@@ -273,8 +273,6 @@ class PhotoshelterService {
       $next_sync_time = clone $time;
       $next_sync_time->modify('+1 day');
       $current_hour = $this->currentTime->format('G');
-      \Drupal::logger('photoshelter')->notice($current_hour);
-      \Drupal::logger('photoshelter')->notice($next_sync_time->format(DATETIME_DATETIME_STORAGE_FORMAT));
 
       // We check if it's been a day since last queuing
       // and if current time is between 0 and 4 am.
