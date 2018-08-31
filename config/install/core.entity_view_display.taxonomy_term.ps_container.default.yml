@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.taxonomy_term.ps_container.field_ps_container_type
     - field.field.taxonomy_term.ps_container.field_ps_id
     - field.field.taxonomy_term.ps_container.field_ps_key_image
     - field.field.taxonomy_term.ps_container.field_ps_key_image_id
@@ -17,7 +16,6 @@ dependencies:
   module:
     - datetime
     - image
-    - options
     - text
 id: taxonomy_term.ps_container.default
 targetEntityType: taxonomy_term
@@ -31,13 +29,6 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_ps_container_type:
-    weight: 3
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: list_default
-    region: content
   field_ps_id:
     weight: 1
     label: above
