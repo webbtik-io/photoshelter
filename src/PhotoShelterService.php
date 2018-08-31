@@ -69,6 +69,13 @@ class PhotoshelterService {
   protected $currentTime;
 
   /**
+   * PhotoShelter user timezone.
+   *
+   * @var string
+   */
+  protected $psTimezone;
+
+  /**
    * Owner id for images.
    *
    * @var int
@@ -181,6 +188,18 @@ class PhotoshelterService {
           curl_exec($ch);
           curl_close($ch);
         }
+
+        // Get timezone.
+        $endpoint = 'user/session';
+        $fullUrl  = $this->baseUrl . $endpoint .
+          '?api_key=' . $this->apiKey .
+          '&auth_token=' . $this->token;
+        $ch = curl_init($fullUrl);
+        curl_setopt_array($ch, $this->curlOptions);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        $response = json_decode($response, TRUE);
+        $this->psTimezone = $response['data']['Session']['tz'];
       }
     }
     return $this->token;
@@ -544,8 +563,7 @@ class PhotoshelterService {
     $cKeyImageFile  = $collection['KeyImage']['ImageLink']['link'];
     unset($collection);
 
-    $collectionTime = DateTime::createFromFormat('Y-m-d H:i:s e',
-      $cModified, new DateTimeZone('GMT'));
+    $collectionTime = new DrupalDateTime($cModified, $this->psTimezone);
 
     if ($cKeyImageFile !== NULL) {
       $file = File::create(['uri' => $cKeyImageFile]);
@@ -717,7 +735,7 @@ class PhotoshelterService {
     $galleryImageFile   = $gallery['KeyImage']['ImageLink']['link'];
     unset($gallery);
 
-    $galleryTime = new DrupalDateTime($galleryModified, DATETIME_STORAGE_TIMEZONE);
+    $galleryTime = new DrupalDateTime($galleryModified, $this->psTimezone);
 
     if (isset($galleryImageFile)) {
       $file = File::create(['uri' => $galleryImageFile]);
@@ -730,7 +748,7 @@ class PhotoshelterService {
       $term = Term::load($gallery_id);
       $last_sync_time = $term->get('field_ps_last_sync_date')->getString();
       $last_sync_time_obj = new DrupalDateTime($last_sync_time, DATETIME_STORAGE_TIMEZONE);
-      if ($galleryTime < $last_sync_time_obj ) {
+      if ($galleryTime < $last_sync_time_obj) {
         // The collection has not been modified, no update needed.
       }
       else {
