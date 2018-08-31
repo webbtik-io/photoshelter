@@ -32,6 +32,7 @@ REQUIREMENTS
 This module requires the following outside of Drupal core.
 
  * Remote stream wrapper - https://www.drupal.org/project/remote_stream_wrapper
+ * Queue UI - https://www.drupal.org/project/queue_ui
  * PHP 7.0
 
 

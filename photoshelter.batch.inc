@@ -167,3 +167,62 @@ function photoshelter_sync_photo_finished($success, $results, $operations) {
     $messenger->addMessage($message);
   }
 }
+
+/**
+ * Delete PhotoShelter media entities.
+ *
+ * @param array $mids
+ *   Array of media entity ids.
+ * @param $context
+ *   The Batch context array.
+ * @param array $operations
+ *   If success is false, array of not completed operations.
+ */
+function photoshelter_delete_media($mids, &$context) {
+  $medias = \Drupal::entityTypeManager()->getStorage('media')->loadMultiple($mids);
+  \Drupal::entityTypeManager()->getStorage('media')->delete($medias);
+  $message = t('Deleting media entities.');
+  $context['message'] = $message;
+}
+
+/**
+ * Delete PhotoShelter terms.
+ *
+ * @param array $tids
+ *   Array of taxonomy term ids.
+ * @param $context
+ *   The Batch context array.
+ * @param array $operations
+ *   If success is false, array of not completed operations.
+ */
+function photoshelter_delete_terms($tids, &$context) {
+  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadMultiple($tids);
+  \Drupal::entityTypeManager()->getStorage('taxonomy_term')->delete($terms);
+  $message = t('Deleting taxonomy term entities.');
+  $context['message'] = $message;
+}
+
+/**
+ * Photo delete batch finish callback.
+ *
+ * @param bool $success
+ *   If it succeed or not.
+ * @param array $results
+ *   Results item from context variable.
+ * @param array $operations
+ *   If success is false, array of not completed operations.
+ */
+function photoshelter_delete_finish($success, $results, $operations) {
+  $messenger = \Drupal::messenger();
+  $logger = \Drupal::logger('photoshelter');
+  if ($success) {
+    $message = t('All PhotoShelter data is deleted.');
+    $logger->notice($message);
+    $messenger->addMessage($message);
+  }
+  else {
+    $message = t('Finished with an error.');
+    $logger->error($message);
+    $messenger->addMessage($message);
+  }
+}
