@@ -11,13 +11,14 @@ use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
 use Drupal\taxonomy\Entity\Term;
 use Exception;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 /**
  * Class PhotoshelterService.
  *
  * @package Drupal\photoshelter
  */
-class PhotoshelterService {
+class PhotoShelterService {
 
   /**
    * Photoshelter API key.
@@ -586,7 +587,7 @@ class PhotoshelterService {
         $term->set('field_ps_modified_at', $cModified);
         $term->set('field_ps_key_image_id', $cKeyImage);
         $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
-        $term->set('field_ps_last_sync_date', $this->currentTime->format(DATETIME_DATETIME_STORAGE_FORMAT));
+        $term->set('field_ps_last_sync_date', $this->currentTime->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
         $term->save();
       }
     }
@@ -606,7 +607,7 @@ class PhotoshelterService {
         'field_ps_key_image_id'   => $cKeyImage,
         'field_ps_key_image' => isset($file) ?
           ['target_id' => $file->id()] : NULL,
-        'field_ps_last_sync_date' => $this->currentTime->format(DATETIME_DATETIME_STORAGE_FORMAT),
+        'field_ps_last_sync_date' => $this->currentTime->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
       ]);
       $term->save();
     }
@@ -747,7 +748,7 @@ class PhotoshelterService {
     if (!empty($gallery_id)) {
       $term = Term::load($gallery_id);
       $last_sync_time = $term->get('field_ps_last_sync_date')->getString();
-      $last_sync_time_obj = new DrupalDateTime($last_sync_time, DATETIME_STORAGE_TIMEZONE);
+      $last_sync_time_obj = new DrupalDateTime($last_sync_time, DateTimeItemInterface::STORAGE_TIMEZONE);
       if ($galleryTime < $last_sync_time_obj) {
         // The collection has not been modified, no update needed.
       }
@@ -759,7 +760,7 @@ class PhotoshelterService {
         $term->set('field_ps_modified_at', $galleryModified);
         $term->set('field_ps_key_image_id', $galleryImage);
         $term->set('field_ps_key_image', isset($file) ? ['target_id' => $file->id()] : NULL);
-        $term->set('field_ps_last_sync_date', $this->currentTime->format(DATETIME_DATETIME_STORAGE_FORMAT));
+        $term->set('field_ps_last_sync_date', $this->currentTime->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
         $term->set('field_ps_sync_complete', 0);
         $term->save();
       }
@@ -778,7 +779,7 @@ class PhotoshelterService {
         'field_ps_modified_at' => $galleryModified,
         'field_ps_key_image_id'   => $galleryImage,
         'field_ps_key_image' => isset($file) ? ['target_id' => $file->id()] : NULL,
-        'field_ps_last_sync_date' => $this->currentTime->format(DATETIME_DATETIME_STORAGE_FORMAT),
+        'field_ps_last_sync_date' => $this->currentTime->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT),
         'field_ps_sync_complete' => 0,
       ]);
       $term->save();

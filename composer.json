@@ -1,0 +1,15 @@
+{
+    "name": "drupal/photoshelter",
+    "description": "Consumes the PhotoShelter API",
+    "type": "drupal-module",
+    "homepage": "http://drupal.org/project/photoshelter",
+    "license": "GPL-2.0+",
+    "require": {
+        "drupal/queue_ui": "^2.1",
+        "drupal/remote_stream_wrapper": "^1.3"
+    },
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/photoshelter",
+        "source": "http://cgit.drupalcode.org/photoshelter"
+    }
+}
