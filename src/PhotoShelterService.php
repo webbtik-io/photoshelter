@@ -396,7 +396,7 @@ class PhotoShelterService {
       'title' => t('PhotoShelter synchronization'),
       'operations' => $operations,
       'finished' => 'photoshelter_sync_finished',
-      'file' => drupal_get_path('module', 'photoshelter') . '/photoshelter.batch.inc',
+      'file' => \Drupal::service('extension.list.module')->getPath('photoshelter') . '/photoshelter.batch.inc',
     );
 
     batch_set($batch);
@@ -678,7 +678,7 @@ class PhotoShelterService {
           'title' => t('Synchronization of ') . $collectionName,
           'operations' => $operations,
           'finished' => 'photoshelter_sync_finished',
-          'file' => drupal_get_path('module', 'photoshelter') . '/photoshelter.batch.inc',
+          'file' => \Drupal::service('extension.list.module')->getPath('photoshelter') . '/photoshelter.batch.inc',
         );
 
         batch_set($batch);
@@ -894,7 +894,7 @@ class PhotoShelterService {
         'title' => t('Photos import'),
         'operations' => $operations,
         'finished' => 'photoshelter_sync_photo_finished',
-        'file' => drupal_get_path('module', 'photoshelter') . '/photoshelter.batch.inc',
+        'file' => \Drupal::service('extension.list.module')->getPath('photoshelter') . '/photoshelter.batch.inc',
       );
 
       batch_set($batch);

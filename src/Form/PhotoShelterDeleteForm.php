@@ -71,7 +71,7 @@ class PhotoShelterDeleteForm extends FormBase {
         'title' => t('PhotoShelter delete data'),
         'operations' => $operations,
         'finished' => 'photoshelter_delete_finished',
-        'file' => drupal_get_path('module', 'photoshelter') . '/photoshelter.batch.inc',
+        'file' => \Drupal::service('extension.list.module')->getPath('photoshelter') . '/photoshelter.batch.inc',
       );
 
       batch_set($batch);

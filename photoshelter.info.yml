@@ -1,11 +1,9 @@
 name: PhotoShelter API
 description: 'Consumes the PhotoShelter API'
 package: Media
-php: 7.0
 
 type: module
-core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^9 || ^10
 
 dependencies:
   - drupal:media
