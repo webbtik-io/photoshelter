@@ -143,7 +143,7 @@ class PhotoShelterService {
     $this->maxDim = $config->get('max_width') . 'x' . $config->get('max_height');
     $this->rootCollections = $config->get('collections');
     $this->rootGalleries = $config->get('galleries');
-    $this->currentTime = new DateTime(NULL, new DateTimeZone('GMT'));
+    $this->currentTime = new DateTime('now', new DateTimeZone('GMT'));
     $this->authenticate();
   }
 
