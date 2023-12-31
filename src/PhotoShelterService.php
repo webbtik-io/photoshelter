@@ -1025,6 +1025,7 @@ class PhotoShelterService {
   public function getParentTerm($parent_ps_id) {
     $query = \Drupal::entityQuery('taxonomy_term');
     $query->condition('field_ps_id', $parent_ps_id);
+    $query->accessCheck(TRUE);
     $tids = $query->execute();
     $tid = !empty($tids) ? reset($tids) : '';
     return $tid;
@@ -1043,6 +1044,7 @@ class PhotoShelterService {
     $query = \Drupal::entityQuery('taxonomy_term');
     $query->condition('vid', 'ps_container');
     $query->condition('field_ps_id', $container_ps_id);
+    $query->accessCheck(TRUE);
     $tids = $query->execute();
     $tid = !empty($tids) ? reset($tids) : '';
     return $tid;
@@ -1061,6 +1063,7 @@ class PhotoShelterService {
     $query = \Drupal::entityQuery('media');
     $query->condition('bundle', 'ps_image');
     $query->condition('field_ps_id', $image_ps_id);
+    $query->accessCheck(TRUE);
     $mids = $query->execute();
     $mid = !empty($mids) ? reset($mids) : '';
     return $mid;

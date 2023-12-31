@@ -41,6 +41,7 @@ class PhotoShelterDeleteForm extends FormBase {
     // Delete media entities.
     $query = \Drupal::entityQuery('media');
     $query->condition('bundle', 'ps_image');
+    $query->accessCheck(TRUE);
     $mids = $query->execute();
     if (!empty($mids)) {
       $batch_array = array_chunk($mids, 20);
@@ -55,6 +56,7 @@ class PhotoShelterDeleteForm extends FormBase {
     // Delete media entities.
     $query = \Drupal::entityQuery('taxonomy_term');
     $query->condition('vid', '%' . \Drupal::database()->escapeLike('ps_') . '%', 'LIKE');
+    $query->accessCheck(TRUE);
     $tids = $query->execute();
     if (!empty($tids)) {
       $batch_array = array_chunk($tids, 20);
