@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeZone;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
@@ -142,7 +143,7 @@ class PhotoShelterService {
     $this->allowPrivate = $config->get('allow_private');
     $this->maxDim = $config->get('max_width') . 'x' . $config->get('max_height');
     $this->rootCollections = $config->get('collections');
-    $this->rootGalleries = $config->get('galleries');
+    $this->rootGalleries = $this->convertUnderscoresToDotsInKeys($config->get('galleries'));
     $this->currentTime = new DateTime('now', new DateTimeZone('GMT'));
     $this->authenticate();
   }
@@ -204,6 +205,23 @@ class PhotoShelterService {
       }
     }
     return $this->token;
+  }
+
+  /**
+   * Converts underscores back to dots in array keys.
+   *
+   * @param array $galleries
+   *   Array of galleries with keys possibly containing underscores.
+   * @return array
+   *   Array with keys where underscores are replaced by dots.
+   */
+  public function convertUnderscoresToDotsInKeys($galleries) {
+    $converted = [];
+    foreach ($galleries as $key => $value) {
+      $convertedKey = str_replace('_', '.', $key);
+      $converted[$convertedKey] = $value;
+    }
+    return $converted;
   }
 
   /**

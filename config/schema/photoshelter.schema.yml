@@ -11,9 +11,33 @@ photoshelter.settings:
     api_key:
       type: string
       label: 'Example API Key'
-    last_full_sync:
-      type: string
-      label: 'Last Full Sync'
     last_sync:
       type: string
-      labe: 'Last Sync'
+      label: 'Last Sync'
+    max_width:
+      type: string
+      label: 'Max Width'
+    max_height:
+      type: string
+      label: 'Max Height'
+    allow_private:
+      type: boolean
+      label: 'Allow Private'
+    cron_sync:
+      type: boolean
+      label: 'Cron Sync'
+    containers_names:
+      type: sequence
+      label: 'Container Names'
+      sequence:
+        type: mapping
+        mapping:
+          name:
+            type: string
+            label: 'Name'
+          id:
+            type: string
+            label: 'ID'
+          type:
+            type: string
+            label: 'Type'
