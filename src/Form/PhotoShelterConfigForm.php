@@ -84,7 +84,7 @@ class PhotoShelterConfigForm extends ConfigFormBase {
       $gallery_options = [];
       foreach ($container_names as $container) {
         if ($container['type'] == 'collection') {
-          $collection_options[$container['id']] = $container['name'];
+          $collection_options[str_replace('.', '_', $container['id'])] = $container['name'];
         }
         else {
           $gallery_options[str_replace('.', '_', $container['id'])] = $container['name'];
