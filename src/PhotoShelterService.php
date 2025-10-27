@@ -219,7 +219,7 @@ class PhotoShelterService {
     $converted = [];
     foreach ($keys as $key => $value) {
       $convertedKey = str_replace('_', '.', $key);
-      $converted[$convertedKey] = $value;
+      $converted[$convertedKey] = str_replace('_', '.', $value);
     }
     return $converted;
   }
@@ -487,7 +487,7 @@ class PhotoShelterService {
     $jsonResponse = json_decode($response, TRUE);
     $collection   = $jsonResponse['data']['Collection'];
 
-    if ($collection['Visibility']['mode'] == 'everyone' || $this->allowPrivate == TRUE) {
+    if (!empty($collection) && ($collection['Visibility']['mode'] == 'everyone' || $this->allowPrivate == TRUE)) {
       $this->saveCollection($collection, $time, $update, $collection['Visibility']['mode'], $process, $parentId);
     }
   }
